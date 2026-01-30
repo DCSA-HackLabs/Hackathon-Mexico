@@ -60,9 +60,6 @@ En pocos minutos, el ambiente estará listo.
 
 ---
 
-## ⚠️ Consideraciones importantes
-
-- El despli
 
 [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](
 https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmakanto32%2FHackathon-Mexico%2Fmain%2F00-Preparacion%2520Landing%2520Zone%2Fazuredeploy.json
