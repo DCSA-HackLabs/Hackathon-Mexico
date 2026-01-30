@@ -28,7 +28,7 @@ Todo el despliegue se realiza usando **Infrastructure as Code (IaC)**, garantiza
 
 
 ### 📦 Almacenamiento
-- **:contentReference[oaicite:1]{index=1}**
+
   - Usado para:
     - Carga de archivos
     - Datasets del hackathon
