@@ -259,11 +259,14 @@ if ($transactionsFile) {
         
         if ($success) { $loaded++ } else { $failed++ }
         
-        # Mostrar progreso cada 100 registros
-        if ($loaded % 100 -eq 0 -and $loaded -gt 0) {
-            Write-Host "  Progreso: $loaded / $total" -ForegroundColor Gray
+        # Mostrar progreso cada 10 registros o cada registro si son pocos
+        $progressInterval = if ($total -lt 50) { 1 } elseif ($total -lt 200) { 10 } else { 50 }
+        if (($loaded % $progressInterval -eq 0) -or ($loaded -eq $total)) {
+            $percent = [math]::Round(($loaded / $total) * 100)
+            Write-Host "`r  ⏳ Progreso: $loaded / $total ($percent%)" -ForegroundColor Gray -NoNewline
         }
     }
+    Write-Host ""  # Nueva línea después del progreso
     
     Write-Success "$ContainerName : $loaded cargados / $failed fallidos / $total total"
 }
