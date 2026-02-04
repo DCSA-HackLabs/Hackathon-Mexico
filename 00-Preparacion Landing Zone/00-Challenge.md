@@ -22,7 +22,7 @@ Al completar este reto podrás:
 ## 🚀 Paso 1: Crear Azure Cosmos DB para no SQL 
 💡 *¿Por qué?* Cosmos DB nos servira como la fuente de los datos que seran ingestados desde Fabric 
 
-1️⃣ Ingresa al portal de **Microsoft Azure** y crea una base de datos Cosmos DB para no SQL. Para mayor conveniencia recomendamos ejecutar el template de despliegue que permitira acelerar este proceso de creacion de artefactos de Azure como se muestra en el archivo [DeployToAzure](./00-Preparacion Landing Zone/DeployToAzure.md)  
+1️⃣ Ingresa al portal de **Microsoft Azure** y crea una base de datos Cosmos DB para no SQL. Para mayor conveniencia recomendamos ejecutar el template de despliegue que permitira acelerar este proceso de creacion de artefactos de Azure como se muestra en el archivo [DeployToAzure](../DeployToAzure.md)  
 🔹 Asigna un nombre descriptivo (por ejemplo, `ContosoData-Source`).  
 🔹 Crea el contenedor y asigna un nombre identificable.  
 🔹 Sube el dataset en formato JSON
