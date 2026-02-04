@@ -20,7 +20,8 @@ Resultado esperado
 
 ## 1 - Crear Azure Cosmos DB (NoSQL)
 
-**NOTA**
+**NOTA**  
+
 Por conveniencia se recomienda utilizar el template de despliegue de artefactos de Azure [DeployToAzure](./DeployToAzure.md) el cual permite crear la Cosmos DB NoSQL y otros artefactos de Azure de manera automatizada. En caso de utilizar el template omitiremos este primer paso, caso contrario seguiremos el paso 1 de manera manual.
 
 1. Accede al portal de Azure.
