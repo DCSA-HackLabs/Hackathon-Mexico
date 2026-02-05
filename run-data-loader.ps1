@@ -43,7 +43,8 @@ function Add-CosmosDocument {
         [string]$Database,
         [string]$Container,
         [hashtable]$Document,
-        [string]$PartitionKeyField = "id"
+        [string]$PartitionKeyField = "id",
+        [ref]$LastError = $null
     )
 
     $resourceLink = "dbs/$Database/colls/$Container"
@@ -82,6 +83,9 @@ function Add-CosmosDocument {
     catch {
         if ($_.Exception.Response.StatusCode -eq 409) {
             return $true  # Ya existe
+        }
+        if ($LastError -ne $null) {
+            $LastError.Value = $_.Exception.Message
         }
         return $false
     }
@@ -224,10 +228,61 @@ if ($transactionsFile) {
     $total = $data.Count
     $loaded = 0
     $failed = 0
+    $lastErrorMsg = ""
     
     Write-Info "Encontradas $total transacciones para cargar..."
     
-    foreach ($item in $data) {
+    # Probar con el primer documento para verificar conexión
+    Write-Info "Verificando conexión a Cosmos DB..."
+    $testItem = $data[0]
+    $testDoc = @{}
+    foreach ($prop in $testItem.PSObject.Properties) {
+        $testDoc[$prop.Name] = $prop.Value
+    }
+    if (-not $testDoc.ContainsKey("id")) {
+        $testDoc["id"] = [guid]::NewGuid().ToString()
+    }
+    
+    $testError = [ref]""
+    $testPartitionKey = if ($testDoc.ContainsKey("transactionId")) { "transactionId" } 
+                        elseif ($testDoc.ContainsKey("transaction_id")) { "transaction_id" }
+                        else { "id" }
+    
+    $testSuccess = Add-CosmosDocument -Endpoint $cosmosEndpoint -Key $cosmosKey `
+        -Database $DatabaseName -Container $ContainerName -Document $testDoc `
+        -PartitionKeyField $testPartitionKey -LastError $testError
+    
+    if (-not $testSuccess) {
+        Write-ErrorMsg "Error de conexión a Cosmos DB: $($testError.Value)"
+        Write-Info "Verificando si existe la base de datos y contenedor..."
+        
+        # Verificar base de datos
+        $dbExists = az cosmosdb sql database show --account-name $cosmosAccountName --resource-group $ResourceGroupName --name $DatabaseName --output json 2>$null
+        if (-not $dbExists) {
+            Write-ErrorMsg "La base de datos '$DatabaseName' no existe. Creándola..."
+            az cosmosdb sql database create --account-name $cosmosAccountName --resource-group $ResourceGroupName --name $DatabaseName --output none
+        }
+        
+        # Verificar contenedor
+        $containerExists = az cosmosdb sql container show --account-name $cosmosAccountName --resource-group $ResourceGroupName --database-name $DatabaseName --name $ContainerName --output json 2>$null
+        if (-not $containerExists) {
+            Write-ErrorMsg "El contenedor '$ContainerName' no existe. Creándolo..."
+            az cosmosdb sql container create --account-name $cosmosAccountName --resource-group $ResourceGroupName --database-name $DatabaseName --name $ContainerName --partition-key-path "/id" --output none
+        }
+        
+        Write-Success "Base de datos y contenedor verificados/creados"
+    }
+    else {
+        Write-Success "Conexión a Cosmos DB verificada"
+        $loaded = 1  # Ya insertamos el primer documento
+    }
+    
+    # Continuar con el resto de documentos
+    $startIndex = if ($loaded -eq 1) { 1 } else { 0 }
+    
+    for ($i = $startIndex; $i -lt $data.Count; $i++) {
+        $item = $data[$i]
+        
         # Convertir PSObject a hashtable
         $document = @{}
         foreach ($prop in $item.PSObject.Properties) {
@@ -252,21 +307,33 @@ if ($transactionsFile) {
                             elseif ($document.ContainsKey("transaction_id")) { "transaction_id" }
                             else { "id" }
         
+        $errorRef = [ref]""
         # Insertar en Cosmos DB
         $success = Add-CosmosDocument -Endpoint $cosmosEndpoint -Key $cosmosKey `
             -Database $DatabaseName -Container $ContainerName -Document $document `
-            -PartitionKeyField $partitionKeyField
+            -PartitionKeyField $partitionKeyField -LastError $errorRef
         
-        if ($success) { $loaded++ } else { $failed++ }
+        if ($success) { 
+            $loaded++ 
+        } else { 
+            $failed++
+            if ($failed -eq 1) {
+                $lastErrorMsg = $errorRef.Value
+            }
+        }
         
         # Mostrar progreso cada 10 registros o cada registro si son pocos
         $progressInterval = if ($total -lt 50) { 1 } elseif ($total -lt 200) { 10 } else { 50 }
-        if (($loaded % $progressInterval -eq 0) -or ($loaded -eq $total)) {
-            $percent = [math]::Round(($loaded / $total) * 100)
-            Write-Host "`r  ⏳ Progreso: $loaded / $total ($percent%)" -ForegroundColor Gray -NoNewline
+        if ((($loaded + $failed) % $progressInterval -eq 0) -or (($loaded + $failed) -eq $total)) {
+            $percent = [math]::Round((($loaded + $failed) / $total) * 100)
+            Write-Host "`r  ⏳ Progreso: $($loaded + $failed) / $total ($percent%) - ✅$loaded ❌$failed" -ForegroundColor Gray -NoNewline
         }
     }
     Write-Host ""  # Nueva línea después del progreso
+    
+    if ($failed -gt 0 -and $lastErrorMsg) {
+        Write-Info "Último error: $lastErrorMsg"
+    }
     
     Write-Success "$ContainerName : $loaded cargados / $failed fallidos / $total total"
 }
