@@ -425,7 +425,7 @@ Para este ejercicio vamos a utilizar este método.
     - **Actions Items**:
       - En el campo **Conversation context** dejamos la opcion *System.ConversationId*
       - En el campo **Input message** dejamos la opción *System.LastMessage*
-      - Dejamos encendida la opción **Automatically include agent response as part of the workflow (external) conversation**
+      - Dejamos apagada la opción **Automatically include agent response as part of the workflow (external) conversation**. Esto asegura que en un front-end productivo este agente no respondera anticipadamente (la idea es que el Advisor acumule los outputs de los agentes). **En el Playground si se veran los outputs como parte del entorno de pruebas de Foundry**
       - En el campo **Save agent output message as** declaramos el nombre de una variable *sales_insights* que guardara la respuesta del Sales Agent, presionamos **enter** para que almacene como **Local.sales_insights**
       - El campo **Save output json_object/json_schema as** lo dejamos vacío
       - El campo **Next action** lo dejaremos vacío de momento
@@ -442,7 +442,7 @@ Ahora agregaremos un nuevo agente para buscar información de mercado
     - **Actions Items**:
       - En el campo **Conversation context** dejamos la opcion *System.ConversationId*
       - En el campo **Input message** dejamos la opción *System.LastMessage*
-      - Dejamos encendida la opción **Automatically include agent response as part of the workflow (external) conversation**
+      - Dejamos apagada la opción **Automatically include agent response as part of the workflow (external) conversation**. Esto asegura que en un front-end productivo este agente no respondera anticipadamente (la idea es que el Advisor acumule los outputs de los agentes). **En el Playground si se veran los outputs como parte del entorno de pruebas de Foundry**
       - En el campo **Save agent output message as** declaramos el nombre de una variable *market_insights* que guardara la respuesta del Research Agent, presionamos **enter** para que almacene como                              **Local.market_insights**
       - El campo **Save output json_object/json_schema as** lo dejamos vacío
       - El campo **Next action** lo dejaremos vacío de momento
@@ -495,8 +495,8 @@ Este nodo se ejecuta solo si la condición del If/Else es TRUE.
     - **Actions Items**:
       - En el campo **Conversation context** dejamos la opcion *System.ConversationId*
       - En el campo **Input message** dejamos la opción *System.LastMessage*
-      - Dejamos encendida la opción **Automatically include agent response as part of the workflow (external) conversation**
-      - En el campo **Save agent output message as** declaramos el nombre de una variable *credit_insights* que guardara la respuesta del Credit Agent, presionamos **enter** para que almacene como                              **Local.credit_insights**
+      - Dejamos apagada la opción **Automatically include agent response as part of the workflow (external) conversation**. Esto asegura que en un front-end productivo este agente no respondera anticipadamente (la idea es que el Advisor acumule los outputs de los agentes). **En el Playground si se veran los outputs como parte del entorno de pruebas de Foundry**
+      - En el campo **Save agent output message as** declaramos el nombre de una variable *credit_insights* que guardara la respuesta del Credit Agent, presionamos **enter** para que almacene como **Local.credit_insights**
       - El campo **Save output json_object/json_schema as** lo dejamos vacío
       - El campo **Next action** lo dejaremos vacío de momento
       - Presionamos **Done** para que se guarde la configuración
@@ -538,7 +538,7 @@ El Strategy Advisor sintetiza toda la información recopilada.
       - En el campo **Conversation context** dejamos la opción *System.ConversationId*
       - En el campo **Input message** dejamos la opción *System.LastMessage*. Lo tenemos activado en todos los nodos por lo que el Strategy Advisor va tener acceso al query original, todo lo quer dijo Sales Agent,               Market Research y Credit Agent (si se ejecutó)
       - Dejamos encendida la opción **Automatically include agent response as part of the workflow (external) conversation**
-      - En el campo **Save agent output message as** declaramos el nombre de una variable *final_recommendations* que guardara la respuesta del Credit Agent, presionamos **enter** para que almacene como                          **Local.final_recommendations**
+      - En el campo **Save agent output message as** declaramos el nombre de una variable *final_recommendations* que guardara la respuesta del Credit Agent, presionamos **enter** para que almacene como **Local.final_recommendations**
       - El campo **Save output json_object/json_schema as** lo dejamos vacío
       - El campo **Next action** lo dejaremos vacío
       - Presionamos **Done** para que se guarde la configuración
@@ -546,6 +546,7 @@ El Strategy Advisor sintetiza toda la información recopilada.
 - Ahora que ambas ramas convergen en **Strategy Advisor** este nodo sintetizara basandose en lo que este disponible en la conversacion:
     - Si pasó por **Credit Agent**: verá esos insights
     - Si no pasó por **Credit Agent**: solo verá Sales y Market Research
+    - En todos los casos el agente tiene acceso a las conversaciones y variables previas.
  
    ![New Foundry](/img/workflow8.png)
 
