@@ -533,7 +533,7 @@ El Strategy Advisor sintetiza toda la información recopilada.
 - Agrega **Invoke agent**
 - Configura las opciones del nodo:
     - **Action ID**: Se genera automáticamente
-    - **Select an agent**: Buscamos nuestro agente de Ventas Retail [**Contoso-Credit-Risk-Analyst**]
+    - **Select an agent**: Buscamos nuestro agente Advisor [**Contoso-Strategy-Advisor**]
     - **Actions Items**:
       - En el campo **Conversation context** dejamos la opción *System.ConversationId*
       - En el campo **Input message** dejamos la opción *System.LastMessage*. Lo tenemos activado en todos los nodos por lo que el Strategy Advisor va tener acceso al query original, todo lo quer dijo Sales Agent,               Market Research y Credit Agent (si se ejecutó)
