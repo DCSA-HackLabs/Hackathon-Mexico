@@ -5,7 +5,9 @@
 .DESCRIPTION
     Este script:
     1. Carga transactions.json a Cosmos DB (contenedor Transactions)
-    2. Extrae y sube archivos PDF de "Financial Data Zip" al Storage Account (contenedor documents-pdf)
+    2. Carga creditScore.json a Cosmos DB (contenedor CreditScores)
+    3. Carga product.json a Cosmos DB (contenedor Products)
+    4. Extrae y sube archivos PDF de "Financial Data Zip" al Storage Account (contenedor documents-pdf)
 
 .PARAMETER ResourceGroupName
     Nombre del Resource Group donde se desplegaron los recursos.
@@ -98,6 +100,8 @@ Write-Host @"
 ║                                                                              ║
 ║   Este script cargará:                                                       ║
 ║   • transactions.json a Cosmos DB (contenedor Transactions)                 ║
+║   • creditScore.json a Cosmos DB (contenedor CreditScores)                  ║
+║   • product.json a Cosmos DB (contenedor Products)                          ║
 ║   • Financial Data (PDFs) al Storage Account                                ║
 ║                                                                              ║
 ╚══════════════════════════════════════════════════════════════════════════════╝
@@ -272,6 +276,156 @@ else {
     Write-Info "Asegúrate de tener el archivo en la carpeta Datasets"
 }
 
+
+# ============================================================================
+# CARGAR creditScore.json A COSMOS DB
+# ============================================================================
+Write-Step "Cargando creditScore.json a Cosmos DB..."
+
+$CreditScoreContainerName = "CreditScores"
+
+$creditScoreFile = Get-ChildItem -Path $DatasetPath -Filter "creditScore.json" -ErrorAction SilentlyContinue | Select-Object -First 1
+
+if ($creditScoreFile) {
+    Write-Info "Procesando: $($creditScoreFile.Name) -> $CreditScoreContainerName"
+
+    $jsonContent = Get-Content -Path $creditScoreFile.FullName -Raw -Encoding UTF8
+    $creditScores = $jsonContent | ConvertFrom-Json
+
+    if ($creditScores -is [Array]) {
+        $csData = $creditScores
+    }
+    elseif ($creditScores.creditScores) {
+        $csData = $creditScores.creditScores
+    }
+    elseif ($creditScores.data) {
+        $csData = $creditScores.data
+    }
+    else {
+        $csData = @($creditScores)
+    }
+
+    $csTotal = $csData.Count
+    $csLoaded = 0
+    $csFailed = 0
+
+    Write-Info "Encontrados $csTotal registros de credit score para cargar..."
+
+    foreach ($item in $csData) {
+        $document = @{}
+        foreach ($prop in $item.PSObject.Properties) {
+            $document[$prop.Name] = $prop.Value
+        }
+
+        if (-not $document.ContainsKey("id")) {
+            if ($document.ContainsKey("creditScoreId")) {
+                $document["id"] = $document["creditScoreId"]
+            }
+            elseif ($document.ContainsKey("credit_score_id")) {
+                $document["id"] = $document["credit_score_id"]
+            }
+            elseif ($document.ContainsKey("customerId")) {
+                $document["id"] = $document["customerId"]
+            }
+            else {
+                $document["id"] = [guid]::NewGuid().ToString()
+            }
+        }
+
+        $partitionKeyField = if ($document.ContainsKey("creditScoreId")) { "creditScoreId" }
+                            elseif ($document.ContainsKey("credit_score_id")) { "credit_score_id" }
+                            else { "id" }
+
+        $success = Add-CosmosDocument -Endpoint $cosmosEndpoint -Key $cosmosKey `
+            -Database $DatabaseName -Container $CreditScoreContainerName -Document $document `
+            -PartitionKeyField $partitionKeyField
+
+        if ($success) { $csLoaded++ } else { $csFailed++ }
+
+        if ($csLoaded % 100 -eq 0 -and $csLoaded -gt 0) {
+            Write-Host "  Progreso: $csLoaded / $csTotal" -ForegroundColor Gray
+        }
+    }
+
+    Write-Success "$CreditScoreContainerName : $csLoaded cargados / $csFailed fallidos / $csTotal total"
+}
+else {
+    Write-Info "No se encontró creditScore.json en: $DatasetPath"
+}
+
+# ============================================================================
+# CARGAR product.json A COSMOS DB
+# ============================================================================
+Write-Step "Cargando product.json a Cosmos DB..."
+
+$ProductContainerName = "Products"
+
+$productFile = Get-ChildItem -Path $DatasetPath -Filter "product.json" -ErrorAction SilentlyContinue | Select-Object -First 1
+
+if ($productFile) {
+    Write-Info "Procesando: $($productFile.Name) -> $ProductContainerName"
+
+    $jsonContent = Get-Content -Path $productFile.FullName -Raw -Encoding UTF8
+    $products = $jsonContent | ConvertFrom-Json
+
+    if ($products -is [Array]) {
+        $prodData = $products
+    }
+    elseif ($products.products) {
+        $prodData = $products.products
+    }
+    elseif ($products.data) {
+        $prodData = $products.data
+    }
+    else {
+        $prodData = @($products)
+    }
+
+    $prodTotal = $prodData.Count
+    $prodLoaded = 0
+    $prodFailed = 0
+
+    Write-Info "Encontrados $prodTotal productos para cargar..."
+
+    foreach ($item in $prodData) {
+        $document = @{}
+        foreach ($prop in $item.PSObject.Properties) {
+            $document[$prop.Name] = $prop.Value
+        }
+
+        if (-not $document.ContainsKey("id")) {
+            if ($document.ContainsKey("productId")) {
+                $document["id"] = $document["productId"]
+            }
+            elseif ($document.ContainsKey("product_id")) {
+                $document["id"] = $document["product_id"]
+            }
+            else {
+                $document["id"] = [guid]::NewGuid().ToString()
+            }
+        }
+
+        $partitionKeyField = if ($document.ContainsKey("productId")) { "productId" }
+                            elseif ($document.ContainsKey("product_id")) { "product_id" }
+                            else { "id" }
+
+        $success = Add-CosmosDocument -Endpoint $cosmosEndpoint -Key $cosmosKey `
+            -Database $DatabaseName -Container $ProductContainerName -Document $document `
+            -PartitionKeyField $partitionKeyField
+
+        if ($success) { $prodLoaded++ } else { $prodFailed++ }
+
+        if ($prodLoaded % 100 -eq 0 -and $prodLoaded -gt 0) {
+            Write-Host "  Progreso: $prodLoaded / $prodTotal" -ForegroundColor Gray
+        }
+    }
+
+    Write-Success "$ProductContainerName : $prodLoaded cargados / $prodFailed fallidos / $prodTotal total"
+}
+else {
+    Write-Info "No se encontró product.json en: $DatasetPath"
+}
+
 # ============================================================================
 # SUBIR ARCHIVOS PDF (FINANCIAL DATA ZIP) AL STORAGE ACCOUNT
 # ============================================================================
@@ -353,6 +507,8 @@ Write-Host ""
 Write-Host "🗄️  COSMOS DB: $cosmosAccountName" -ForegroundColor Yellow
 Write-Host "   Database:   FabricChallengeDB"
 Write-Host "   Contenedor: Transactions (datos de transactions.json)"
+Write-Host "   Contenedor: CreditScores (datos de creditScore.json)"
+Write-Host "   Contenedor: Products (datos de product.json)"
 Write-Host ""
 Write-Host "📦 STORAGE ACCOUNT: $storageAccountName" -ForegroundColor Yellow
 Write-Host "   Contenedor con datos:"
