@@ -550,7 +550,7 @@ El Strategy Advisor sintetiza toda la información recopilada.
    ![New Foundry](/img/workflow8.png)
 
 
-**Agregar Nodo: End (Retornar Respuesta)**
+**Agregar Nodo: Send Message (Retornar Respuesta)**
   - Click en el **+** despues de **Strategy Advisor**
   - Selecciona **Send message** para configurar el retorno de mensaje al usuario
   - En la ventana de **Message to send** seleccionamos la variable **final_recommendations** que proviene del nodo **Invoque Strategy Advisor**
