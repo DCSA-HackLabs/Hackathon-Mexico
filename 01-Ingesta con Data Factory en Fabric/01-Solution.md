@@ -34,8 +34,11 @@ Consejo: agrega pasos de validación intermedios y usa muestras pequeñas para p
 1. Configura el sink/destino como la Lakehouse `Contoso_Lakehouse` → buscar esquema → crear tabla. Ejemplo `[bronze].[sales]`. Recuerda activar la opcion de **advance options** : `Navigate using full hierarchy` que permite navegar sobre la estructura jerarquica de `schemas/tablas`.  Repetir con los otros datasets
 2. Ejecuta el Dataflow en modo de validacion y luego en producción.
 
- ![DF](/img/dfgen22.png)  
-
+ ![DF](/img/dfgen22.png)
+ ![DF](/img/dfgen23.png)  
+ ![DF](/img/dfgen24.png)  
+ ![DF](/img/dfgen25.png)  
+ 
 ### 4 - Verificar y documentar
 
 1. Abre la Lakehouse y revisa cada una de las tablas. Ejemplo `[bronze].[sales]`.
