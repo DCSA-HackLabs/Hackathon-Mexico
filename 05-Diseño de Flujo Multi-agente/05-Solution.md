@@ -678,7 +678,7 @@ Cuando el Router emite `[CROSS]`, ninguna condición individual es verdadera y e
 ![New Foundry](/img/else2.png)
 ![New Foundry](/img/else3.png)
 ![New Foundry](/img/else4.png)
-![New Foundry](/img/else5.png)
+
 
 ---
 
