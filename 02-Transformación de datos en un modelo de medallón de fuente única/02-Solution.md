@@ -218,12 +218,13 @@ df_segmentado.groupBy("perfil_crediticio").count().orderBy("count", ascending=Fa
 
 ---
 
-## **Filtrar clientes con perfil Alto 🥇**
-**NOTA**: Este paso puede omitirse si se desea analizar todos los tiers y no solo los de perfil alto (valioso)
+## **Filtrar clientes por perfil🥇**
+**NOTA**: Este paso puede ajustarse si se desea analizar todos los tiers o solo los de perfil alto (valioso)
 
 ```python
-#NOTA: Este paso puede omitirse
-df_gold_fin = df_segmentado.filter(col("perfil_crediticio") == "Alto") 
+#df_gold_fin = df_segmentado.filter(col("perfil_crediticio") == "Alto") 
+#display(df_gold_fin)
+df_gold_fin = df_segmentado
 ```
 
 ---
