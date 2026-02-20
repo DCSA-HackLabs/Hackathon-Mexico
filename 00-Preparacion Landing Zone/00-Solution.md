@@ -105,13 +105,13 @@ Verificación
 1.  Dentro del Workspace creado selecciona `+New item` → Dataflow Gen2
 2.  En el nuevo DataFlow gen 2 → Get data → More → buscas Azure Cosmos DBv2.
     
-	![Cosmos](/img/cosmoscon.png)
+![Cosmos](/img/cosmoscon.png)
 
 3.  En la config de conexion vamos a agregar:
    - Cosmos DB Endpoint: Vamos a colocar el endpoint de la cuenta de Cosmos DB, se puede obtener en el recurso de Cosmos DB en la opción Settings → Keys
    - Connection name: El nombre de nuestra conexión
    - Authentication kind: Account key
-   - Acount key: El PRIMARY KEY de la cuenta de Cosmos DB. Se puede obtener en el recurso de Cosmos DB en la opción Settings → Keys → PRIMARY 
+   - Acount key: El PRIMARY KEY de la cuenta de Cosmos DB. Se puede obtener en el recurso de Cosmos DB en la opción `Settings` → `Keys` → `PRIMARY KEY` 
 
 ![Cosmos](/img/cosmoscon1.png)
 
