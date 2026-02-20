@@ -2,8 +2,9 @@
 
 📖 Escenario  
 
-En el contexto de la IA aplicada a la automatización de procesos de negocio, la orquestación de agentes permite escalar la toma de decisiones mediante la colaboración de agentes con roles diferenciados. Contoso, como empresa de retail y financiera, necesita combinar múltiples fuentes de información para tomar decisiones estratégicas informadas.
-En este reto diseñarás y construirás un flujo multi-agente que coordine datos internos de **ventas**, perfiles crediticios de **clientes**, e **inteligencia de mercado** externa para automatizar análisis complejos de negocio y proporcionar recomendaciones estratégicas basadas en datos.
+En el contexto de la IA aplicada a la automatización de procesos de negocio, la orquestación de agentes permite escalar la toma de decisiones mediante la colaboración de agentes con roles diferenciados. Contoso, como empresa de retail y financiera, necesita combinar múltiples fuentes de información para tomar decisiones estratégicas informadas. 
+
+En este reto diseñarás y construirás un flujo multi-agente que coordine datos internos de **ventas**, perfiles crediticios de **clientes**, e **inteligencia de mercado** externa para automatizar análisis complejos de negocio y proporcionar recomendaciones estratégicas basadas en datos. 
 
 En escenarios productivos desde luego que estos flujos pueden involucrar no solo análisis, si no acciones y ejecuciones, pero para este escenario el objetivo es conceptualizar la segmentación de roles en flujos agenticos de manera que posteriormente se puedan implementar soluciones más avanzadas
 
@@ -12,7 +13,7 @@ En escenarios productivos desde luego que estos flujos pueden involucrar no solo
 ### 🎯 Tu Misión  
 Al completar este reto podrás:  
 
-✅ Definir **tres agentes** con responsabilidades claras. Puedes definirlo acorde a que escenario quieres resolver un ejemplo puede ser (Ventas, Crédito, Investigación de Mercado).  
+✅ Definir **cuatro agentes especializados** con responsabilidades claras (Ventas, Crédito, Investigación de Mercado, Sintetizador) más un **agente orquestador (Router)** que dirija el flujo de forma inteligente.  
 ✅ Diseñar un **flujo orquestado** colaborativo usando Foundry Workflows con ramificaciones **condicionales** y manejo de **errores**.  
 ✅ Integrar fuentes de datos internas **(Microsoft Fabric)** con herramientas externas, ejemplo: **(Bing Search)**.  
 ✅ Validar escenarios de negocio complejos que requieren síntesis de múltiples dominios de información.  
@@ -25,13 +26,13 @@ Este reto se construye sobre el trabajo de los retos anteriores:
 
 **Retos 1-3:** Implementaste el pipeline de datos
 
-*Bronze*: Ingesta desde Cosmos DB
-*Silver*: Transformaciones con productos, credit y transacciones
-*Gold*: Tablas curadas, modeladas o unificadas, ejemplo: business_operations y segmentaciones ML
+*Bronze*: Ingesta desde Cosmos DB  
+*Silver*: Transformaciones con productos, credit y transacciones  
+*Gold*: Tablas curadas, modeladas o unificadas, ejemplo: business_operations y segmentaciones ML  
 
-**Reto 4:** Configuraste agentes especializados
+**Reto 4:** Configuraste agentes especializados 
 
-**Sales Operations Analyst (Contoso-Virtual-Analyst)** conectado a **business_operations** (o tus tablas propias)
+**Sales Operations Analyst (Contoso-Virtual/Sales-Analyst)** conectado a **business_operations** (o tus tablas propias)
 
 **Reto 5 (este)**: Diseña la orquestación de agentes con inteligencia externa
 ¿Cómo colaboran para responder preguntas complejas como:
@@ -55,23 +56,30 @@ Estas preguntas requieren:
 
 **Agentes Especializados**
 
-1. Sales Operations Agent
+0. Router Agent (a crear) 
 
-- *Fuente*: **gold.business_operations** (Microsoft Fabric). O la tabla que utilizaste para tu Data Agent
-- Expertise: Revenue, canales, productos, MSI, segmentación de tickets
-- Queries típicos: "¿Cuál es el revenue por canal?", "¿Top productos vendidos?"
+- *Fuente*: Ninguna (analiza el texto del query) 
+- *Expertise*: Clasificación de intención del usuario y ruteo inteligente 
+- *Comportamiento*: Trabaja en silencio, emite **un único tag** — `[SALES]`, `[MARKET]`, `[CREDIT]` para consultas de un solo dominio, o `[CROSS]` cuando la pregunta involucra múltiples dominios 
+- *Queries típicos*: Cualquier consulta del usuario — él decide quién responde 
+
+1. Sales Operations Agent (existente, creado en reto previo)
+
+- *Fuente*: **gold.business_operations** (Microsoft Fabric). O la tabla que utilizaste para tu Data Agent 
+- Expertise: Revenue, canales, productos, MSI, segmentación de tickets 
+- Queries típicos: "¿Cuál es el revenue por canal?", "¿Top productos vendidos?" 
 
 2. Credit Risk Agent (a crear)
 
-- *Fuente*: **gold.credit_scores** (Microsoft Fabric)
-- *Expertise*: Perfiles crediticios (Bajo, Medio, Alto, Premium), scores, capacidad de pago
-- *Queries típicos*: "¿Cuántos clientes Premium?", "¿Score promedio por perfil?"
+- *Fuente*: **gold.credit_scores** (Microsoft Fabric) 
+- *Expertise*: Perfiles crediticios (Bajo, Medio, Alto, Premium), scores, capacidad de pago 
+- *Queries típicos*: "¿Cuántos clientes Premium?", "¿Score promedio por perfil?" 
 
 3. Market Research Agent (a crear)
 
 - *Fuente*: **Bing Search API**
-- *Expertise*: Tendencias de industria, análisis de competencia, benchmarks de mercado
-- *Queries típicos*: "¿Tendencias en productos premium?", "¿Precios de competidores?"
+- *Expertise*: Tendencias de industria, análisis de competencia, benchmarks de mercado 
+- *Queries típicos*: "¿Tendencias en productos premium?", "¿Precios de competidores?" 
 
 4. Strategy Advisor Agent (a crear)
 
@@ -81,48 +89,48 @@ Estas preguntas requieren:
 
 Foundry Workflows
 
-- Visual designer para construcción de flujos
-- Invoke Agent nodes para llamar agentes especializados
-- Set Variable nodes para pasar contexto entre agentes
-- If/Else nodes para ramificaciones condicionales
-- YAML y Code views para control avanzado
+- Visual designer para construcción de flujos 
+- Invoke Agent nodes para llamar agentes especializados 
+- Set Variable nodes para pasar contexto entre agentes 
+- If/Else nodes para ramificaciones condicionales 
+- YAML y Code views para control avanzado 
 
 
 ## 🚀 Paso 1: Definir Roles y Responsabilidades de los Agentes  
 💡 *¿Por qué?* Una separación clara de responsabilidades reduce el acoplamiento y facilita la escalabilidad.  
 
 **Agente de Ventas Internas (Sales Operations Analyst)**  
-  - Analiza datos transaccionales históricos
-  - Calcula métricas de revenue, volumen, canales
-  - Identifica patrones de compra y productos top
-  - Segmenta por tickets (Low, Medium, High)
+  - Analiza datos transaccionales históricos 
+  - Calcula métricas de revenue, volumen, canales 
+  - Identifica patrones de compra y productos top 
+  - Segmenta por tickets (Low, Medium, High) 
 
-*Entradas*: Queries sobre ventas, productos, canales, MSI
-*Salidas*: Métricas cuantitativas, rankings, distribuciones
+*Entradas*: Queries sobre ventas, productos, canales, MSI 
+*Salidas*: Métricas cuantitativas, rankings, distribuciones 
 
 **Agente de Riesgo Crediticio (Credit Risk Analyst)**  
-  - Evalúa perfiles crediticios de clientes
-  - Identifica segmentos por capacidad de pago
-  - Analiza distribución de scores y ratios financieros
-  - Recomienda estrategias de financiamiento 
+  - Evalúa perfiles crediticios de clientes 
+  - Identifica segmentos por capacidad de pago 
+  - Analiza distribución de scores y ratios financieros 
+  - Recomienda estrategias de financiamiento  
 
 **Agente de Investigación de Mercado (Market Research Analyst)**
-  - Busca tendencias actuales de la industria
-  - Obtiene información de competidores
-  - Encuentra benchmarks y estándares del mercado
-  - Proporciona contexto externo a decisiones internas
+  - Busca tendencias actuales de la industria 
+  - Obtiene información de competidores 
+  - Encuentra benchmarks y estándares del mercado 
+  - Proporciona contexto externo a decisiones internas 
 
-*Entradas*: Keywords sobre productos, categorías, mercados
-*Salidas*: Insights de tendencias, datos de competencia, contexto de mercado
+*Entradas*: Keywords sobre productos, categorías, mercados 
+*Salidas*: Insights de tendencias, datos de competencia, contexto de mercado 
 
 **Agente Sintetizador (Strategy Advisor)**
-  - Recibe outputs de los agentes especializados
-  - Identifica correlaciones entre datos internos y externos
-  - Sintetiza información en recomendaciones accionables
-  - Presenta insights de manera estructurada
+  - Recibe outputs de los agentes especializados 
+  - Identifica correlaciones entre datos internos y externos 
+  - Sintetiza información en recomendaciones accionables 
+  - Presenta insights de manera estructurada 
 
-*Entradas*: Outputs de los 3 agentes especializados + query original del usuario
-*Salidas*: Análisis integrado con recomendaciones estratégicas
+*Entradas*: Outputs de los 3 agentes especializados + query original del usuario 
+*Salidas*: Análisis integrado con recomendaciones estratégicas 
 
 ✅ **Resultado esperado:** Definición clara de los 4 roles con sus entradas, salidas y criterios de éxito.
 
@@ -134,14 +142,16 @@ Foundry Workflows
 **Arquitectura del Flujo**  
 
 1️⃣ Gatillo de inicio: Query del usuario vía Playground  
-2️⃣ Secuencia base:  
+2️⃣ **Router Agent**: analiza la consulta y emite **un único tag** — `[SALES]`, `[MARKET]`, `[CREDIT]`, o `[CROSS]`  
+3️⃣ Routing condicional:  
 
 ![Multi](/img/multi-flujo.png)  
 
-3️⃣ Condiciones y ramificaciones:  
-- Evaluar si el query requiere análisis crediticio  
-- Si menciona "clientes", "perfil", "crédito" → invocar Credit Agent  
-- Si solo pregunta por productos/mercado → skip Credit Agent  
+4️⃣ Condiciones y ramificaciones:  
+- Si el router emite `[SALES]` → solo Sales Agent responde  
+- Si el router emite `[MARKET]` → solo Market Research Agent responde  
+- Si el router emite `[CREDIT]` → solo Credit Risk Agent responde  
+- Si el router emite `[CROSS]` → los 3 agentes especializados se ejecutan en secuencia y el Strategy Advisor sintetiza  
 
 4️⃣ Retroalimentación:  
 - Variables pasadas entre nodos mantienen contexto  
@@ -162,16 +172,22 @@ Foundry Workflows
 
 **Configuración por Agente**
 
+**Router Agent (Orquestador):**
+
+- *Model*: **gpt-4o**
+- *Tools*: **None** (analiza el texto del query)
+- *Instructions*: [Clasifica intención del usuario y emite tags de ruteo internos]
+
 **Sales Operations Analyst:**
 
 - *Model*: **gpt-4o**
-- *Tools*: **Fabric Data Agent (business_operations)**
+- *Tools*: **Fabric Data Agent [Contoso-Agent Sales] (business_operations)**
 - *Instructions*: [Enfoque en métricas de ventas internas]
 
 **Credit Risk Analyst:**
 
 - *Model*: **gpt-4o**
-- *Tools*: **Fabric Data Agent (credit_score)**
+- *Tools*: **Fabric Data Agent [Contoso-Agent Credit Risk] (credit_score)**
 - *Instructions*: [Enfoque en perfiles y capacidad crediticia]
 
 **Market Research Analyst:**
@@ -190,41 +206,35 @@ Foundry Workflows
 
 ---
 
-### 🚀 Paso 4: Construir el Workflow en Foundry 
-💡 *¿Por qué?* La implementación visual facilita debugging y comprensión del flujo.
+## Paso 4: Construir el Workflow en Foundry
+💡 ¿Por qué? La implementación visual facilita debugging y comprensión del flujo.
 
 **Componentes del Workflow**
 
 **Start Node:**
+* Captura el mensaje del usuario en dos variables: `Local.UserQuestion` (texto plano) y `Local.LatestMessage` (mensaje formateado)
 
-- Recibe input del usuario
-- Inicializa el workflow
+**Router Agent Node:**
+* Invoca al Router Agent con el query del usuario
+* Emite un único tag de ruteo en silencio (`Local.LatestMessage`)
+* No envía respuesta al usuario (`autoSend: false`)
 
-**Invoke Agent Nodes (x3-4):**
+**ConditionGroup Node:**
+* Evalúa el tag emitido por el Router Agent
+* Si el tag es `[SALES]`, `[MARKET]` o `[CREDIT]` → invoca solo ese agente y termina
+* Si ninguna condición individual es verdadera (`[CROSS]`) → cae al `elseActions`
 
-- Llaman a agentes especializados
-- Pasan contexto via variables
-- Capturan outputs
-
-**Set Variable Nodes:**
-
-- Guardan resultados intermedios
-- Permiten pasar contexto entre agentes
-- Facilitan debugging
-
-**If/Else Node:**
-
-- Evalúa condiciones del query
-- Decide si invocar Credit Agent
-- Ramifica el flujo dinámicamente
+**elseActions (caso cross-dominio):**
+* Restaura `Local.LatestMessage` desde `Local.UserQuestion`
+* Invoca Sales, Market Research y Credit Risk en secuencia
+* Cada agente acumula su respuesta en `Local.LatestMessage`
+* El Strategy Advisor recibe el historial completo y sintetiza
 
 **End Node:**
+* Retorna respuesta final al usuario
+* Cierra el workflow
 
-- Retorna respuesta final
-- Cierra el workflow
-- Registra completion
-
-✅ **Resultado esperado:** Workflow funcional en Foundry con todos los nodos conectados y configurados.
+✅ Resultado esperado: Workflow funcional en Foundry con todos los nodos conectados y configurados.
 
 ---
 
@@ -237,11 +247,11 @@ Foundry Workflows
 - **Query**: "¿Cómo se comparan nuestras ventas de iPhone vs las tendencias del mercado?"
 
 Flujo esperado:
-Sales Analyst → Ventas internas de iPhone
-Market Research → Tendencias de mercado de iPhone (Bing Search)
-Strategy Advisor → Comparación y análisis de gaps
+Sales Analyst → Ventas internas de iPhone  
+Market Research → Tendencias de mercado de iPhone (Bing Search)  
+Strategy Advisor → Comparación y análisis de gaps  
 
-Resultado esperado: Insight sobre posición de mercado con recomendaciones
+✅ Resultado esperado: Insight sobre posición de mercado con recomendaciones
 
 **Escenario 2: Recomendación Segmentada**
 
@@ -249,10 +259,10 @@ Resultado esperado: Insight sobre posición de mercado con recomendaciones
 
 Flujo esperado:
 
-Credit Risk → Identifica clientes perfil Alto
-Sales Analyst → Productos premium que compran
-Market Research → Tendencias en productos premium
-Strategy Advisor → Recomendaciones basadas en las 3 fuentes
+Credit Risk → Identifica clientes perfil Alto  
+Sales Analyst → Productos premium que compran  
+Market Research → Tendencias en productos premium  
+Strategy Advisor → Recomendaciones basadas en las 3 fuentes  
 
 Resultado esperado: Lista de productos recomendados con justificación
 
@@ -262,9 +272,9 @@ Resultado esperado: Lista de productos recomendados con justificación
 
 Flujo esperado:
 
-Sales Analyst → Precios actuales de laptops
-Market Research → Precios de competidores (Bing Search)
-Strategy Advisor → Gap analysis y recomendaciones
+Sales Analyst → Precios actuales de laptops  
+Market Research → Precios de competidores (Bing Search)  
+Strategy Advisor → Gap analysis y recomendaciones  
 
 Resultado esperado: Análisis de competitividad con sugerencias de ajuste
 
@@ -305,8 +315,10 @@ Elementos a Documentar
 
 ### 🏁 Puntos de Control Finales
 
-✅ ¿Están definidos los 4 agentes con sus roles y responsabilidades claras?  
-✅ ¿El flujo orquestado incluye condiciones, variables y manejo de contexto?  
+✅ ¿Están definidos los 5 agentes (Router + 3 especializados + Advisor) con sus roles y responsabilidades claras?  
+✅ ¿El Router Agent emite tags correctos para diferentes tipos de consulta?  
+✅ ¿El flujo activa solo los agentes necesarios según el tipo de consulta?  
+✅ ¿El Strategy Advisor solo se invoca cuando 2 o más agentes participaron?  
 ✅ ¿Los 3 agentes especializados están configurados en Foundry con tools apropiados?  
 ✅ ¿El workflow está construido visualmente en Foundry Workflows?  
 ✅ ¿Los 3 escenarios de negocio fueron probados exitosamente?  
