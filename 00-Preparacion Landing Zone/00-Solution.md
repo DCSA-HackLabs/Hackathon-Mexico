@@ -25,31 +25,61 @@ Resultado esperado
 Por conveniencia se recomienda utilizar el template de despliegue de artefactos de Azure [DeployToAzure](./DeployToAzure.md) el cual permite crear la Cosmos DB NoSQL y otros artefactos de Azure de manera automatizada. En caso de utilizar el template omitiremos este primer paso, caso contrario seguiremos el paso 1 de manera manual.
 
 1. Accede al portal de Azure.
-2. Busca **Azure Cosmos DB** → Crear → seleccionar API **NoSQL**.
-3. Rellena: resource group, account name (`contoso-cosmosdb`), region.
-	![Crear Cosmos](https://github.com/stmora98/Del_Insight_a_la_Decision/blob/main/00%20-%20Preparacion%20Landing%20Zone/Reference%20Pictures/Creando%20Cosmos%20-%20Basics.png)
+2. En el buscador de Azure escribe **Azure Cosmos DB** → +Crear → seleccionar API **Azure Cosmos DB for NoSQL** → Crear.
+3. Rellena:
+   - Workload Type: `Development/Testing`
+   - Subscription: `tu subscripción de Azure`
+   - Resource Group: `tu grupo de recursos`
+   - Account name: `nombre de la cuenta a crear`
+   - Location:  `Tu región default`
+   - Availability Zones: `Disable`
+   - Capacity mode: `Serverless`
+   - Global Distribution: `Disable`
+   - Networking: `All networks`
+   - Backup Policy: `Dejar valor por defecto`
+   - Key-based authentication: `Enable`
+   - Encryption: `Service-managed key`
+   - Tags: `Vacios`
 
-	![Review](https://github.com/stmora98/Del_Insight_a_la_Decision/blob/main/00%20-%20Preparacion%20Landing%20Zone/Reference%20Pictures/Creando%20Cosmos%20-%20Review.png)
-4. Crear la cuenta. En *Data Explorer* crea la base de datos y contenedores (por ejemplo `products`, `credit`, `transactions`).
-  	![Data Explorer](https://github.com/stmora98/Del_Insight_a_la_Decision/blob/main/00%20-%20Preparacion%20Landing%20Zone/Reference%20Pictures/2%20-Data%20Explorer.png)
+Review + create
    
-   	![New item](https://github.com/stmora98/Del_Insight_a_la_Decision/blob/main/00%20-%20Preparacion%20Landing%20Zone/Reference%20Pictures/2%20-Upload%20Item.png)
+![New Foundry](/img/cosmos1.png)
 
-5. Carga los archivos JSON (manualmente desde Data Explorer o usando Azure Data Factory para cargas repetibles).
-   	![Upload Jason](https://github.com/stmora98/Del_Insight_a_la_Decision/blob/main/00%20-%20Preparacion%20Landing%20Zone/Reference%20Pictures/2%20-Upload%20json.png)
+4. Una vez creada la cuenta de Cosmos DB. En *Data Explorer* crea la base de datos con la opcion +New → New Database → Database id → `<nombre>` por ejemplo DB-Hackathon
 
-Verificación
+![New Foundry](/img/cosmos2.png)  	
+  
+5.Crea un contenedor para cada set de datos (por ejemplo `products`, `credit`, `transactions`). Sobre el mismo botón de +New seleccionamos → New container → seleccionamos:
+- Database id: `Use existing` y seleccionamos la base que acabamos de crear
+- Container id: `products`
+- Partition key: `/id`
+- OK
+
+**Repetimos este proceso para los otros set de datos de `credit` y `transactions`**
+   
+![New Foundry](/img/cosmos3.png)  	
+   
+6. Carga los archivos JSON (manualmente desde Data Explorer o usando Azure Data Factory para cargas repetibles). En Data Explorer repitiendo este mismo proceso para cada contenedor creado seleccionamos la opción → `Item` → `Upload Item` → seleccionamos el archivo JSON correspondiente para cada contenedor  → `Upload`
+
+![New Foundry](/img/cosmos4.png)
+
+7. Verificación
 - En *Data Explorer* se ven documentos JSON en el contenedor.
+  
+![New Foundry](/img/cosmos5.png)
 
 ---
 
 ## 2 - Crear Workspace en Microsoft Fabric
 
-1. Abre Microsoft Fabric y crea un workspace llamado `ContosoData-Fabric`.
-2. Asocia una Fabric Capacity (si tu organización la tiene asignada).
+1. Abre Microsoft Fabric → en la barra lateral izquierda selecciona `Workspaces` → `+New workspace` y crea un workspace llamado `ContosoData-Fabric` o el nombre que prefieras.
+2. Una vez creado, busca la opción `Workspace settings`→ Workspace type` → `Edit` y asocia el nuevo Workspace al Capacity de Fabric (este paso no es necesario si tu organización ya tiene un Workspace asignado a un capacity que puedas usar).
+3. Agrega tu usuario como Admin/Contributor al Workspace
 
 Verificación
-- El workspace aparece en el listado y tienes permisos adecuados.
+- El workspace aparece en el listado de espacios de trabajo y tienes permisos adecuados.
+
+![Fabric](/img/wscreate.png)
 
 ---
 
@@ -72,18 +102,20 @@ Verificación
 
 ## 4 - Conectar Fabric a Azure Cosmos DB
 
-1. Crear nuevo item de tipo Dataflow Gen2.
-2. En Fabric DataFlow gen 2 → New → Connection → Azure Cosmos DB.  
-	![Crear Conexion](https://github.com/stmora98/Del_Insight_a_la_Decision/blob/main/00%20-%20Preparacion%20Landing%20Zone/Reference%20Pictures/Crear%20Dataflow%201.png)
+1.  Dentro del Workspace creado selecciona `+New item` → Dataflow Gen2
+2.  En el nuevo DataFlow gen 2 → Get data → More → buscas Azure Cosmos DBv2.
+    
+	![Cosmos](/img/cosmoscon.png)
 
-	![Buscar conector Cosmos](https://github.com/stmora98/Del_Insight_a_la_Decision/blob/main/00%20-%20Preparacion%20Landing%20Zone/Reference%20Pictures/Crear%20Dataflow%202.png)
+3.  En la config de conexion vamos a agregar:
+   - Cosmos DB Endpoint: Vamos a colocar el endpoint de la cuenta de Cosmos DB, se puede obtener en el recurso de Cosmos DB en la opción Settings → Keys
+   - Connection name: El nombre de nuestra conexión
+   - Authentication kind: Account key
+   - Acount key: El PRIMARY KEY de la cuenta de Cosmos DB. Se puede obtener en el recurso de Cosmos DB en la opción Settings → Keys → PRIMARY 
 
-	![Buscar Conector 2](https://github.com/stmora98/Del_Insight_a_la_Decision/blob/main/00%20-%20Preparacion%20Landing%20Zone/Reference%20Pictures/Crear%20Dataflow%203.png)
+	![Cosmos](/img/cosmoscon1.png)
 
-4. Proporciona endpoint y clave (Azure Portal → Cosmos DB → Keys).
-	![Conectar cosmos](https://github.com/stmora98/Del_Insight_a_la_Decision/blob/main/00%20-%20Preparacion%20Landing%20Zone/Reference%20Pictures/Connect%20Data%20source.png)
-
-5. Testea y guarda la conexión.
+4. Testea y guarda la conexión.
 
 Verificación
 - La conexión se prueba y puedes ver containers/collections disponibles.
