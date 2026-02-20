@@ -38,6 +38,7 @@ Consejo: agrega pasos de validación intermedios y usa muestras pequeñas para p
  ![DF](/img/dfgen23.png)  
  ![DF](/img/dfgen24.png)  
  ![DF](/img/dfgen25.png)  
+ ![DF](/img/dfgen26.png)  
  
 ### 4 - Verificar y documentar
 
