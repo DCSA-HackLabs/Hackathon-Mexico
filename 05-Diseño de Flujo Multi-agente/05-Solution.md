@@ -1,6 +1,6 @@
 ### Solution - Reto 5: Orquestación Multi-Agente
 
-Guía paso a paso para habilitar un multi-agente desde AI Foundry integrado con el Data Agent de Microsoft Fabric y otros agentes.
+Guía paso a paso para habilitar un multi-agente desde AI Foundry integrado con el Data Agent de Microsoft Fabric y otros agentes. Esta solución incluye un **Router Agent** que orquesta el flujo de forma inteligente: emite un único tag (`[SALES]`, `[MARKET]`, `[CREDIT]` o `[CROSS]`) para dirigir la consulta al agente correcto, o activar todos los agentes especializados más el Strategy Advisor cuando la pregunta cruza múltiples dominios.
 
 ### Prerequisitos 🎯
 Antes de comenzar, asegúrate de tener:  
@@ -18,7 +18,7 @@ Antes de comenzar, asegúrate de tener:
 
   **Prototipo de la solucion**
 
-   ![New Foundry](/img/workflow-diagram.png)
+   ![New Foundry](/img/multi-flujo.png)
 
 
 ## Pasos
@@ -160,6 +160,47 @@ Eres un especialista en análisis de riesgo crediticio que ayuda a entender perf
 
 ---
 
+### 1.2 Modificar el system prompt del agente existente de ventas (Contoso-Sales-Analyst)
+
+En preparacion del flujo multi-agente vamos a ajustar el system-prompt del primer agente que teniamos creado en Foundry conectado a `Contoso-Sales Agent de Fabric`. Esto va permitir a este agente operar de una manera mas organizada con los demás agentes especializados.
+
+```
+# Rol y Contexto
+Eres un asistente experto en análisis operacional que tiene acceso a 
+datos de transacciones y productos de la empresa Contoso.
+
+# Fuente de Datos
+Tienes acceso a datos actualizados del Data Agent de Fabric llamado 'Contoso Agent-Sales' que contiene datos de:
+- business_operations (tablas de transacciones y productos)
+
+## PASO 1 — FILTRO DE RELEVANCIA (ejecuta esto PRIMERO, antes de cualquier otra acción)
+Identifica la pregunta original del usuario. Ignora cualquier respuesta de otros agentes que veas en el historial.
+¿La pregunta original menciona alguno de estos temas?
+- Ventas, revenue, ingresos, transacciones
+- Productos, categorías, SKUs, inventario
+- Canales de venta, tickets, órdenes
+- Performance interno de Contoso
+
+SI NO menciona ninguno de estos temas → responde ÚNICAMENTE: [SKIP]. Para. No escribas nada más.
+SI SÍ menciona alguno → continúa con las secciones siguientes.
+
+# Comportamiento Esperado
+1. Siempre consulta los datos antes de responder preguntas factuales
+2. Si no encuentras información en los datos, indícalo claramente
+3. Cita las fuentes específicas cuando uses información de los datos
+4. Mantén un tono profesional y técnico
+
+# Restricciones
+- No inventes información que no esté en los datos
+- Siempre valida fechas y números antes de reportarlos
+- No respondas basándote en lo que otros agentes dijeron en el historial
+
+# Formato de Respuesta
+- Usa tablas para datos numéricos
+- Incluye contexto cuando sea relevante
+- Sé conciso pero completo
+```
+
 ### 2 - Crear Agente en AI Foundry conectado al Data Agent Credit Risk Analyst (Riesgo Crediticio)
 
 Crear Nuevo Agente
@@ -177,20 +218,34 @@ Eres un asistente experto en análisis de riesgo crediticio que tiene acceso a d
 Tienes acceso a datos actualizados del Data Agent de Fabric llamado 'Contoso Agent-Credit-Risk' que contiene datos de:
 - credit_score (tablas de score crediticio por cliente)
 
+## PASO 1 — FILTRO DE RELEVANCIA (ejecuta esto PRIMERO, antes de cualquier otra acción)
+Identifica la pregunta original del usuario. Ignora cualquier respuesta de otros agentes que veas en el historial.
+¿La pregunta original menciona alguno de estos temas?
+- Perfiles crediticios, scores, segmentos de clientes
+- Capacidad de pago, deuda, comportamiento de pago
+- Clientes Premium, Alto, Medio, Bajo
+- Riesgo financiero, riesgo crediticio
+- Segmentación de clientes, tipos de clientes
+
+SI NO menciona ninguno de estos temas → responde ÚNICAMENTE: [SKIP]. Para. No escribas nada más.
+SI SÍ menciona alguno → continúa con las secciones siguientes.
+
 # Comportamiento Esperado
 1. Siempre consulta los datos antes de responder preguntas factuales
 2. Si no encuentras información en los datos, indícalo claramente
 3. Cita las fuentes específicas cuando uses información de los datos
-4. Mantén un tono [profesional y técnico según necesites]
+4. Mantén un tono profesional y técnico
 
 # Restricciones
 - No inventes información que no esté en los datos
 - Siempre valida fechas y números antes de reportarlos
+- No respondas basándote en lo que otros agentes dijeron en el historial
 
 # Formato de Respuesta
 - Usa tablas para datos numéricos
 - Incluye contexto cuando sea relevante
 - Sé conciso pero completo
+
 ```
 
 ✅ **Resultado esperado:** Tenemos ahora dos agentes en AI Foundry conectados a su vez con dos data agent en Fabric. En escenarios reales dependiendo del dominio de datos se puede consolidar un data agent a nivel de modelo semántico (con varias tablas) pero en entornos multi-sectoriales conviene mantener una separación por área de negocio.
@@ -208,6 +263,17 @@ Tienes acceso a datos actualizados del Data Agent de Fabric llamado 'Contoso Age
 **Instructions**
   ```
 Eres el Analista de Investigación de Mercados para Contoso.
+
+## PASO 1 — FILTRO DE RELEVANCIA (ejecuta esto PRIMERO, antes de cualquier otra acción)
+Identifica la pregunta original del usuario. Ignora cualquier respuesta de otros agentes que veas en el historial.
+¿La pregunta original menciona alguno de estos temas?
+- Tendencias de mercado o industria
+- Competidores, benchmarks, precios externos
+- Comportamiento del consumidor
+- Contexto externo del sector retail
+
+SI NO menciona ninguno de estos temas → responde ÚNICAMENTE: [SKIP]. Para. No escribas nada más.
+SI SÍ menciona alguno → continúa con las secciones siguientes.
 
 ## TUS FUENTES DE DATOS
 Tienes acceso a Bing Search para encontrar información pública sobre:
@@ -239,26 +305,18 @@ Al buscar:
 4. Siempre cita fuentes con fechas de publicación
 5. Aclara qué información NO se encontró
 
-## BÚSQUEDAS DE EJEMPLO
-- "cuota de mercado iPhone 15 Q4 2024"
-- "precio promedio laptops 2024"
-- "tendencias electrónica retail 2024"
-- "preferencias consumidor productos premium"
-- "estrategia precios competidores [categoría producto]"
-
 ## LO QUE NO MANEJAS
-- Datos internos de ventas o información de clientes (manejado por Analista de Operaciones de Ventas)
-- Perfiles crediticios o capacidad financiera (manejado por Analista de Riesgo Crediticio)
+- Datos internos de ventas o información de clientes
+- Perfiles crediticios o capacidad financiera
 - Recomendaciones directas de productos basadas en datos internos
 
 ## DIRECTRICES CRÍTICAS
 - Sé objetivo y presenta múltiples perspectivas
+- No respondas basándote en lo que otros agentes dijeron en el historial
 - Reconoce limitaciones (ej. "Los datos públicos sugieren..." vs "Nuestros datos internos muestran...")
 - Señala cuando la información es especulativa o basada en opiniones
-- Actualiza búsquedas si te preguntan sobre eventos muy recientes
 - No inventes información - si no puedes encontrarla, dilo claramente
 
-Cuando los usuarios pregunten sobre desempeño interno de ventas o perfiles crediticios de clientes, indica que estos temas requieren los agentes internos especializados y ofrece proporcionar contexto de mercado en su lugar.
   ```
 
 2. Configurar Tools
@@ -363,13 +421,19 @@ Formatea tu respuesta así:
 [Desafíos potenciales o advertencias]
 
 ## LINEAMIENTOS CRÍTICOS
-1. Siempre integra TODAS las fuentes proporcionadas (ventas + crédito + mercado)
-2. Identifica correlaciones entre datos internos y externos
-3. Señala discrepancias o brechas entre las fuentes
-4. Prioriza recomendaciones accionables
-5. Sé específico con números y métricas cuando estén disponibles
-6. Reconoce limitaciones de datos
-7. Considera tanto oportunidades COMO riesgos
+1. No todas las consultas activarán los 3 agentes. Sintetiza SOLO con las fuentes que participaron en esta conversación. Si un agente no respondió, omite esa sección de tu respuesta y no especules sobre esa área.
+2. Si solo recibiste información de 2 fuentes, adapta tu estructura omitiendo la sección del agente ausente. Tu síntesis sigue siendo valiosa aunque no estén las 3 fuentes.
+3. Siempre integra TODAS las fuentes que sí estén disponibles
+4. Identifica correlaciones entre datos internos y externos
+5. Señala discrepancias o brechas entre las fuentes
+6. Prioriza recomendaciones accionables
+7. Sé específico con números y métricas cuando estén disponibles
+8. Reconoce limitaciones de datos
+9. Considera tanto oportunidades COMO riesgos
+
+## FUENTES AUSENTES
+Si en el historial ves que un agente respondió únicamente [SKIP], 
+ignora completamente esa fuente en tu síntesis.
 
 ## EJEMPLO DE SÍNTESIS
 Si los datos internos muestran ventas de iPhone decreciendo pero el mercado muestra crecimiento:
@@ -390,243 +454,327 @@ Tu valor está en conectar los puntos entre dominios para generar insights estra
 
 ![New Foundry](/img/supervisor.png)
 
+
+---
+
+### 4.5 - Crear el Router Agent (Orquestador Silencioso) 
+
+El Router Agent es el cerebro del flujo. Analiza la consulta del usuario y decide en silencio a qué agente dirigirla, emitiendo **un único tag** que el workflow intercepta con condiciones Power Fx. **No responde al usuario directamente**.
+
+**Crear el agente**
+- Repite los pasos de creación de agentes anteriores
+- Name: **Contoso-Router-Agent**
+- No vincules ningún tool — este agente trabaja solo con el texto del query
+
+**Instructions (system prompt)**
+
+```
+Eres el enrutador inteligente del sistema multi-agente de Contoso. Tu ÚNICA tarea es analizar la consulta del usuario y decidir qué agentes especializados deben responderla.
+
+## REGLA CRÍTICA
+No respondas en lenguaje natural. No saludes. No expliques nada.
+Tu respuesta debe contener ÚNICAMENTE un tag, en una sola línea.
+
+## LOS TAGS DISPONIBLES
+- [SALES]  → Solo ventas internas
+- [MARKET] → Solo mercado externo
+- [CREDIT] → Solo perfiles de clientes
+- [CROSS]  → Pregunta involucra 2 o más dominios
+
+## CUÁNDO EMITIR CADA TAG
+
+**[SALES]** — Emite este tag si la consulta menciona o implica:
+- Ventas, revenue, ingresos, transacciones
+- Productos, categorías, inventario, SKUs
+- Canales de venta (online, tienda física, MSI)
+- Tickets, órdenes, volumen de ventas
+- Performance interno, comparativas de productos propios
+- Palabras clave: "ventas", "revenue", "productos", "categoría", "canal", "ticket", "iPhone", "laptop", "electronics", "sales"
+
+**[MARKET]** — Emite este tag si la consulta menciona o implica:
+- Tendencias del mercado o la industria
+- Competidores, benchmarks, precios externos
+- Contexto externo, comportamiento del consumidor
+- Palabras clave: "mercado", "tendencias", "competencia", "benchmark", "industria", "market", "trend", "competidor", "precio competitivo", "externo"
+
+**[CREDIT]** — Emite este tag si la consulta menciona o implica:
+- Perfiles crediticios o segmentos de clientes
+- Capacidad de pago, scores crediticios
+- Clientes Premium, Alto, Medio, Bajo
+- Riesgo financiero, deuda, comportamiento de pago
+- Palabras clave: "cliente", "customer", "crédito", "credit", "perfil", "profile", "score", "segmento", "capacidad de pago", "riesgo"
+
+**[CROSS]** — Emite este tag si la consulta involucra 2 o más dominios:
+- Comparación interna vs mercado externo
+- Recomendaciones por perfil de cliente considerando tendencias
+- Análisis que cruza ventas + crédito, ventas + mercado, o los tres
+
+## EJEMPLOS DE RUTEO
+Consulta: "¿Cuáles son nuestras ventas de iPhone este año?"
+Respuesta: [SALES]
+
+Consulta: "¿Cuáles son las tendencias del mercado para smartphones en 2024?"
+Respuesta: [MARKET]
+
+Consulta: "¿Cuántos clientes de perfil Alto tenemos?"
+Respuesta: [CREDIT]
+
+Consulta: "¿Cómo se comparan nuestras ventas de iPhone vs las tendencias del mercado?"
+Respuesta: [CROSS]
+
+Consulta: "¿Qué productos premium deberíamos recomendar a clientes de perfil Alto según las tendencias actuales?"
+Respuesta: [CROSS]
+
+Consulta: "¿Nuestros precios en laptops son competitivos según el mercado?"
+Respuesta: [CROSS]
+
+Consulta: "¿Cuál es el score promedio de nuestros clientes Premium?"
+Respuesta: [CREDIT]
+
+## REGLAS ADICIONALES
+- Responde SIEMPRE con un único tag
+- Ante duda entre un dominio solo o cruce, prefiere [CROSS]
+```
+
+**Validar el Router Agent**
+
+Antes de integrarlo al workflow, prueba el Router Agent en el Playground con estas consultas y verifica que emita el tag correcto:
+
+| Consulta de prueba | Tag esperado |
+|---|---|
+| ¿Cuáles son nuestras ventas de laptop este año? | `[SALES]` |
+| ¿Cuáles son las tendencias del mercado para laptops? | `[MARKET]` |
+| ¿Cuántos clientes tenemos con perfil crediticio Alto? | `[CREDIT]` |
+| ¿Cómo se comparan nuestros precios de laptop vs el mercado? | `[CROSS]` |
+| ¿Qué productos premium recomendar a clientes de perfil Alto según tendencias? | `[CROSS]` |
+
+✅ **Resultado esperado:** El Router Agent responde con un único tag, sin texto adicional.
+
+![New Foundry](/img/router-agent.png)
+
 ---
 
 ### 5 - Crear el Workflow Multi-Agente
 
 **Configuración Inicial del Workflow**
 
-Para poder construir un workflow multi-agente existen varias opciones pro-code como el uso de **Semantic Kernel** o **AutoGen** ahora fusionados dentro del [Microsoft Agent Framework](https://learn.microsoft.com/en-us/agent-framework/overview/agent-framework-overview). Recientemente AI Foundry anuncio un nuevo método llamado **Workflows** de bajo-codigo que permite realizar estos flujos de forma visual facilitando el proceso. 
+Para poder construir un workflow multi-agente existen varias opciones pro-code como el uso de **Semantic Kernel** o **AutoGen** ahora fusionados dentro del [Microsoft Agent Framework](https://learn.microsoft.com/en-us/agent-framework/overview/agent-framework-overview). Recientemente AI Foundry anunció un nuevo método llamado **Workflows** de bajo-código que permite realizar estos flujos de forma visual facilitando el proceso.
 
 Para este ejercicio vamos a utilizar este método.
 
-**Nota**: Antes de construir el flujo asegurate de que tienes construidos los agentes especializados y el sintetizador que formaran parte de este grupo de trabajo de IA
+**Nota**: Antes de construir el flujo asegúrate de que tienes construidos los 5 agentes: Router, Sales, Market Research, Credit Risk y Strategy Advisor.
 
 **Navegar a Workflows**
-- En el portal de AI Foundry estando dentro de la opcion **Build** navegamos al menu lateral --> **Workflows**
+- En el portal de AI Foundry estando dentro de la opción **Build** navegamos al menú lateral → **Workflows**
 
   ![New Foundry](/img/workflow1.png)
-  
-- Click en **Create** y en la lista desplegable seleccionamos **Sequential**. Se desplegara el canvas del flujo, que incluira algunos nodos ya incluidos, podemos utilizarlos o eliminarlos para arrancar de 0. Para este caso lo diseñaremos desde 0 comenzando con el nodo **Start**
+
+- Click en **Create** y en la lista desplegable seleccionamos **Sequential**. Diseñaremos el flujo desde 0 comenzando con el nodo **Start**.
 
   ![New Foundry](/img/workflow2.png)
 
-  
+---
 
 **Configurar Nodos del Workflow**
 
-**Nodo Start**: Ya esta creado, este nodo es el que recibe la conversación. Opcionalmente podemos colocar comentarios con la opción **Add note** para enriquecer el proceso de documentación.
+**Nodo Start**: Ya está creado. Agrega una nota opcional para documentar el flujo.
 
-**Agregar Nodo: Invoque Sales Operations Agent**
-- Click en el botón **+** para agregar un nodo de acción nuevo vinculado a Start. De la lista desplegable de acciones seleciona **Invoke Agent**
-- Configura las opciones del nodo:
-    - **Action ID**: Se genera automáticamente
-    - **Select an agent**: Buscamos nuestro agente de Ventas Retail [**Contoso-Virtual-Analyst**]
-    - **Actions Items**:
-      - En el campo **Conversation context** dejamos la opcion *System.ConversationId*
-      - En el campo **Input message** dejamos la opción *System.LastMessage*
-      - Dejamos apagada la opción **Automatically include agent response as part of the workflow (external) conversation**. Esto asegura que en un front-end productivo este agente no respondera anticipadamente (la idea es que el Advisor acumule los outputs de los agentes). **En el Playground si se veran los outputs como parte del entorno de pruebas de Foundry**
-      - En el campo **Save agent output message as** declaramos el nombre de una variable *sales_insights* que guardara la respuesta del Sales Agent, presionamos **enter** para que almacene como **Local.sales_insights**
-      - El campo **Save output json_object/json_schema as** lo dejamos vacío
-      - El campo **Next action** lo dejaremos vacío de momento
-      - Presionamos **Done** para que se guarde la configuración
-      
-![New Foundry](/img/workflow3.png)
+---
 
-**Agregar Nodo: Invoque Market Research Agent**
-Ahora agregaremos un nuevo agente para buscar información de mercado
-- Click en el botón **+** para agregar un nodo de acción nuevo vinculado al nodo anterior. De la lista desplegable de acciones seleciona **Invoke Agent**
-- Configura las opciones del nodo:
-    - **Action ID**: Se genera automáticamente
-    - **Select an agent**: Buscamos nuestro agente de Ventas Retail [**Contoso-Market-Research-Analyst**]
-    - **Actions Items**:
-      - En el campo **Conversation context** dejamos la opcion *System.ConversationId*
-      - En el campo **Input message** dejamos la opción *System.LastMessage*
-      - Dejamos apagada la opción **Automatically include agent response as part of the workflow (external) conversation**. Esto asegura que en un front-end productivo este agente no respondera anticipadamente (la idea es que el Advisor acumule los outputs de los agentes). **En el Playground si se veran los outputs como parte del entorno de pruebas de Foundry**
-      - En el campo **Save agent output message as** declaramos el nombre de una variable *market_insights* que guardara la respuesta del Research Agent, presionamos **enter** para que almacene como                              **Local.market_insights**
-      - El campo **Save output json_object/json_schema as** lo dejamos vacío
-      - El campo **Next action** lo dejaremos vacío de momento
-      - Presionamos **Done** para que se guarde la configuración
+**Agregar Nodos: Set Variable — Capturar Query del Usuario**
 
-  ![New Foundry](/img/workflow4.png)
+Agregamos dos nodos de variable al inicio para preservar el query original y restaurarlo antes de cada agente.
 
+- Click en **+** → **Set variable**
+  - **Variable name**: `UserQuestion`
+  - **Value**: `=System.LastMessageText`
+- Click en **+** → **Set variable**
+  - **Variable name**: `LatestMessage`
+  - **Value**: `=UserMessage(Local.UserQuestion)`
 
-  **Agregar Nodo: If/Else (Conditional Logic)**
-Este nodo decide si invocar el agente de **Credit Risk** basado en el prompt del usuario
-- Click en el **+** después del nodo de **Market Research Agent**
-- Selecciona **If/Else** (en la sección "Flow"). Aca se utiliza lógica de [Power Fx](https://learn.microsoft.com/en-us/power-platform/power-fx/overview) que es un lenguaje de bajo código de Microsoft 
-    - **Configuracion de Rama IF**
-      Abrimos el editor de texto en el campo **Conditions** y reemplazamos el valor por defecto **true** por el siguiente snippet:
+*¿Por qué dos variables?* `Local.UserQuestion` guarda el texto plano del query original y no se modifica en ningún momento del flujo. `Local.LatestMessage` es la variable "activa" que cada agente recibe como input y sobreescribe con su respuesta. Antes de invocar cada agente especializado hacemos un `restore` — es decir, reasignamos `Local.LatestMessage` desde `Local.UserQuestion` — para garantizar que cada agente recibe la pregunta original del usuario y no la respuesta del agente anterior.
 
-  ```
-      Or(
-  Find("customer", Lower(System.LastMessageText)) > 0,
-  Find("cliente", Lower(System.LastMessageText)) > 0,
-  Find("credit", Lower(System.LastMessageText)) > 0,
-  Find("credito", Lower(System.LastMessageText)) > 0,
-  Find("perfil", Lower(System.LastMessageText)) > 0,
-  Find("profile", Lower(System.LastMessageText)) > 0
-     )
-  ```
-La condición retorna **true** si el mensaje del usuario contiene CUALQUIERA de estas palabras (case-insensitive):
+![New Foundry](/img/workflow3.png) ![New Foundry](/img/workflow3.1.png)
 
-"customer" (cliente en inglés)  
-"client" (cliente)  
-"credit" (crédito)  
-"credit" (crédito en español)  
-"perfil" (perfil en español)  
-"profile" (perfil en inglés)  
+---
 
-- El campo **Next action** lo dejaremos vacío de momento
-- Presionamos **Done** para que se guarde la configuración
+**Agregar Nodo: Invoke Router Agent**
 
-  Debemos tener los dos nodos iniciales y este IF/ELSE con su respectiva condition.
+Este es el primer agente que se ejecuta. Trabaja en silencio y su tag dirige el flujo.
 
- ![New Foundry](/img/workflow6.png)
+- Click en **+** → **Invoke agent**
+- Configura:
+  - **Select an agent**: `Contoso-Router-Agent`
+  - **Conversation context**: `System.ConversationId`
+  - **Input message**: `=Local.LatestMessage`
+  - **Automatically include agent response**: ❌ **Desactivado** (trabaja en silencio)
+  - **Save agent output message as**: `LatestMessage` → se guarda como `Local.LatestMessage`
+- Presiona **Done**
 
- **Agregar Nodo: Invoke Credit Risk Agent (Rama YES)**
-Este nodo se ejecuta solo si la condición del If/Else es TRUE.
+![New Foundry](/img/workflow4.png)
 
-- Click en el **+** que sale de la rama "YES" del **If/Else**
-- Selecciona **Invoke agent**
-- Configura las opciones del nodo:
-    - **Action ID**: Se genera automáticamente
-    - **Select an agent**: Buscamos nuestro agente de Ventas Retail [**Contoso-Credit-Risk-Analyst**]
-    - **Actions Items**:
-      - En el campo **Conversation context** dejamos la opcion *System.ConversationId*
-      - En el campo **Input message** dejamos la opción *System.LastMessage*
-      - Dejamos apagada la opción **Automatically include agent response as part of the workflow (external) conversation**. Esto asegura que en un front-end productivo este agente no respondera anticipadamente (la idea es que el Advisor acumule los outputs de los agentes). **En el Playground si se veran los outputs como parte del entorno de pruebas de Foundry**
-      - En el campo **Save agent output message as** declaramos el nombre de una variable *credit_insights* que guardara la respuesta del Credit Agent, presionamos **enter** para que almacene como **Local.credit_insights**
-      - El campo **Save output json_object/json_schema as** lo dejamos vacío
-      - El campo **Next action** lo dejaremos vacío de momento
-      - Presionamos **Done** para que se guarde la configuración
+---
+
+**Agregar Nodo: ConditionGroup — Routing**
+
+Este es el nodo central. Evalúa el tag que emitió el Router y dirige el flujo.
+
+- Click en **+** → **If/Else**
+
+*Nota sobre el patrón `restore`:* Dentro de cada rama, antes de invocar al agente especializado, siempre agregamos un nodo **Set variable** que reasigna `Local.LatestMessage = UserMessage(Local.UserQuestion)`. Esto es necesario porque después del Router Agent, `Local.LatestMessage` contiene la respuesta del Router (los tags), no el query del usuario. Sin el restore, el agente especializado recibiría `[SALES]` como input en lugar de la pregunta original.
+
+**Condition 1 — `[SALES]`:**
+```
+=!IsBlank(Find("[SALES]", Upper(Last(Local.LatestMessage).Text)))
+```
+Acciones (rama YES):
+- **Set variable**: `LatestMessage` = `=UserMessage(Local.UserQuestion)`
+- **Invoke agent**: `Contoso-Sales-Analyst` → output: `Local.LatestMessage`, autoSend: false
+- **End Conversation**
+
+  ![New Foundry](/img/ifelse.png)
+  ![New Foundry](/img/ifelse1.png)
+  ![New Foundry](/img/ifelse2.png)
+  
+
+**Condition 2 — `[MARKET]`:**
+```
+=!IsBlank(Find("[MARKET]", Upper(Last(Local.LatestMessage).Text)))
+```
+Acciones (rama YES):
+- **Set variable**: `LatestMessage` = `=UserMessage(Local.UserQuestion)`
+- **Invoke agent**: `Contoso-Market-Research-Analyst` → output: `Local.LatestMessage`, autoSend: false
+- **End Conversation**
+
+  ![New Foundry](/img/ifelse3.png)
+  ![New Foundry](/img/ifelse4.png)
+  ![New Foundry](/img/ifelse5.png)
+
+**Condition 3 — `[CREDIT]`:**
+```
+=!IsBlank(Find("[CREDIT]", Upper(Last(Local.LatestMessage).Text)))
+```
+Acciones (rama  YES):
+- **Set variable**: `LatestMessage` = `=UserMessage(Local.UserQuestion)`
+- **Invoke agent**: `Contoso-Credit-Risk-Analyst` → output: `Local.LatestMessage`, autoSend: false
+- **End Conversation**
+
+ ![New Foundry](/img/ifelse6.png)
+ ![New Foundry](/img/ifelse7.png)
+ ![New Foundry](/img/ifelse8.png)
  
 
- ![New Foundry](/img/workflow7.png)
+**elseActions — `[CROSS]` (o cualquier caso no capturado):**
 
-**Configurar Rama Else (Sin Credit)**
-La rama Else (o NO) se ejecuta cuando la condición es FALSE, es decir, cuando el query NO menciona clientes, crédito o perfiles.
+Cuando el Router emite `[CROSS]`, ninguna condición individual es verdadera y el flujo cae aquí. Se ejecutan los 3 agentes en secuencia y el Strategy Advisor sintetiza.
 
-¿Qué hacer con esta rama?
-✅ Respuesta: Conectarla DIRECTAMENTE al Strategy Advisor (sin nodos intermedios)
-*¿Por qué?* No necesitas un nodo intermedio, el Strategy Advisor puede manejar la ausencia de datos crediticios
-Foundry workflows permiten que múltiples ramas converjan en un mismo nodo
+- **Set variable**: `LatestMessage` = `=UserMessage(Local.UserQuestion)`
+- **Invoke agent**: `Contoso-Sales-Analyst` → output: `Local.sales_output` (guardamos el output en una variable), autoSend: false
+- **Set variable**: `LatestMessage` = `=UserMessage(Local.UserQuestion)`
+- **Invoke agent**: `Contoso-Market-Research-Analyst` → output: `Local.LatestMessage`, autoSend: false
+- **Set variable**: `LatestMessage` = `=UserMessage(Local.UserQuestion)`
+- **Invoke agent**: `Contoso-Credit-Risk-Analyst` → output: `Local.LatestMessage`, autoSend: false
+- **Invoke agent**: `Contoso-Strategy-Advisor` → output: `Local.LatestMessage`, autoSend: false
+- **End Conversation**
 
-**Pasos:**
-- NO agregues ningún nodo en la rama Else por ahora
-- Cuando agregues el Strategy Advisor, conectarás AMBAS ramas a él:
-- Rama **If (YES)** → pasa por Credit Agent → Strategy Advisor
-- Rama **Else (NO)** → va DIRECTO a Strategy Advisor
+![New Foundry](/img/else.png)
+![New Foundry](/img/else1.png)
+![New Foundry](/img/else2.png)
+![New Foundry](/img/else3.png)
+![New Foundry](/img/else4.png)
+![New Foundry](/img/else5.png)
 
-*Nota sobre Variables:*
-¿Y la variable credit_insights?
-Cuando la rama **Else** se ejecuta, la variable **Local.credit_insights** simplemente no existe o está vacía. Esto está bien porque:
-- El Strategy Advisor usa System.LastMessage como input
-- Tiene acceso a toda la conversación (toggle "Auto include response" activado)
-- Verá que NO hubo respuesta del Credit Agent y sintetizará solo con Sales y Market Research
+---
 
-
-**Agregar Nodo: Invoke Strategy Advisor (Síntesis)**
-El Strategy Advisor sintetiza toda la información recopilada.
-
-- Después del **Credit Risk Agent (rama YES)**, click en **+**
-- Agrega **Invoke agent**
-- Configura las opciones del nodo:
-    - **Action ID**: Se genera automáticamente
-    - **Select an agent**: Buscamos nuestro agente Advisor [**Contoso-Strategy-Advisor**]
-    - **Actions Items**:
-      - En el campo **Conversation context** dejamos la opción *System.ConversationId*
-      - En el campo **Input message** dejamos la opción *System.LastMessage*. Lo tenemos activado en todos los nodos por lo que el Strategy Advisor va tener acceso al query original, todo lo quer dijo Sales Agent,               Market Research y Credit Agent (si se ejecutó)
-      - Dejamos encendida la opción **Automatically include agent response as part of the workflow (external) conversation**
-      - En el campo **Save agent output message as** declaramos el nombre de una variable *final_recommendations* que guardara la respuesta del Credit Agent, presionamos **enter** para que almacene como **Local.final_recommendations**
-      - El campo **Save output json_object/json_schema as** lo dejamos vacío
-      - El campo **Next action** lo dejaremos vacío
-      - Presionamos **Done** para que se guarde la configuración
-
-- Ahora que ambas ramas convergen en **Strategy Advisor** este nodo sintetizara basandose en lo que este disponible en la conversacion:
-    - Si pasó por **Credit Agent**: verá esos insights
-    - Si no pasó por **Credit Agent**: solo verá Sales y Market Research
-    - En todos los casos el agente tiene acceso a las conversaciones y variables previas.
- 
-   ![New Foundry](/img/workflow8.png)
-
-
-**Agregar Nodo: Send Message (Retornar Respuesta)**
-  - Click en el **+** despues de **Strategy Advisor**
-  - Selecciona **Send message** para configurar el retorno de mensaje al usuario
-  - En la ventana de **Message to send** seleccionamos la variable **final_recommendations** que proviene del nodo **Invoque Strategy Advisor**
-  - El campo **Next action** lo dejaremos vacío
-  - Presionamos **Done** para que se guarde la configuración
+**Guardar el Workflow**
+- Click en **Save** y nómbralo **Workflow-Multi-Agente-Contoso**
 
 ![New Foundry](/img/workflow9.png)
 
+---
 
-- Finalmente agregamos un ultimo Nodo de **End** para cerrar la conversacion. Con esto ya tenemos un flujo inicial para empezar a construir escenarios multi-agentes.
+**Opción alternativa: YAML**
 
-![New Foundry](/img/workflow10.png)
+Si prefieres cargar el workflow directamente vía YAML en lugar de construirlo nodo a nodo, abre la pestaña **YAML** en el canvas y pega el contenido del archivo `workflow-multi-agente-contoso.yaml` incluido en este repositorio. Luego regresa a la pestaña **Visualizer** para verificar la estructura y guarda.
 
-- Salvamos el Workflow dandole un nombre descriptivo por ejemplo **Workflow-Multi-Agente-Contoso**
 
 ### 6 - Testing y Validación el Workflow Multi-Agente
-En este paso vamos a validar el flujo con preguntas que requieran cruzar informacion de distintos agentes.
+En este paso vamos a validar el flujo con preguntas que pongan a prueba el enrutamiento inteligente del Router Agent.
 
 **Preview del Workflow**
 
 Escenario 1:
 
-**Market Comparison (sin credit)**
-- Click en **Preview"** en la parte superior
+**Query de un solo dominio — solo Sales**
+- Click en **Preview** en la parte superior
 - Esto abrirá una ventana de chat
 - Agregamos una pregunta de prueba y ejecutamos
-  
+
   ```
-  ¿Cómo se comparan nuestras ventas de smartphone con las tendencias del mercado?
-  
+  ¿Cuál es el top 5 de productos más vendidos durante el 2024?
   ```
 
-- Una vez completado vemos como cada nodo ejecutado muestra un check **verde** ejecuta segun la orquestacion secuencial. Revisando el output podemos observar como el Strategy Advisor retorna la informacion al usuario e internamente cada agente proporciona su contexto de acuerdo a las configuraciones propias.
- 
- En este caso basado en el prompt el flujo corre segun lo esperado:
+Flujo esperado:
 
-✅ Sales Agent se ejecuta (busca datos de Smartphone)  
-✅ Market Research se ejecuta (busca tendencias de Smartphone en Bing)  
-⏭️ Credit Agent se SALTA (query no menciona customers)  
-✅ Strategy Advisor sintetiza ambas fuentes  
- 
+✅ Router Agent analiza la consulta → emite `[SALES]`  
+✅ Condition `[SALES]` es verdadera → Sales Agent se ejecuta  
+⏭️ Market Research y Credit Risk se SALTAN  
+⏭️ Strategy Advisor se SALTA (no es caso `[CROSS]`)  
+✅ Respuesta directa del Sales Agent al usuario  
 
 ![New Foundry](/img/workflow11.png)
 
+---
 
 Escenario 2:
 
-**Customer Segmentation (Con Credit)**
-- Click en **Preview"** en la parte superior
-- Esto abrirá una ventana de chat
+**Query cross-dominio — Sales + Market + Strategy Advisor**
+- Click en **Preview**
 - Agregamos una pregunta de prueba y ejecutamos
 
- ```
-  ¿Qué productos premium deberíamos recomendar a los clientes del perfil Alto en función de las tendencias actuales del mercado?
-  
+  ```
+  ¿Cómo se comparan nuestras ventas de smartphone con las tendencias del mercado?
   ```
 
-En este segundo caso, basado en el prompt el flujo corre segun lo esperado:
+Flujo esperado:
 
-✅ Sales Agent se ejecuta (productos premium vendidos)  
-✅ Market Research se ejecuta (tendencias en productos premium)  
-✅ Credit Agent se EJECUTA (query menciona "customers" y "perfil Alto")  
-✅ Strategy Advisor sintetiza las 3 fuentes  
-
+✅ Router Agent → emite `[CROSS]`  
+⏭️ Ninguna condición individual es verdadera → cae al `elseActions`  
+✅ Sales Agent se ejecuta (datos internos de smartphones)  
+✅ Market Research se ejecuta (tendencias externas de mercado)  
+✅ Credit Risk se ejecuta  
+✅ Strategy Advisor sintetiza y responde al usuario  
 
 ![New Foundry](/img/workflow12.png)
 
-En el menú **traces** también se puede analizar el flujo de cada nodo para efectos de resolución de problemas
+---
 
-Lo siguiente seria realizar mas validaciones con escenarios y preguntas que puedan poner a prueba el flujo y ajustar en caso de ser necesario.
+Escenario 3:
+
+**Query de perfil de clientes — solo Credit**
+- Click en **Preview**
+- Agregamos una pregunta de prueba y ejecutamos
+
+  ```
+  ¿Cuántos clientes tenemos con perfil crediticio alto?
+  ```
+
+Flujo esperado:
+
+✅ Router Agent → emite `[CREDIT]`  
+✅ Condition `[CREDIT]` es verdadera → Credit Risk Agent se ejecuta  
+⏭️ Sales, Market y Strategy Advisor se SALTAN  
+✅ Respuesta directa del Credit Risk Agent al usuario  
+
+![New Foundry](/img/workflow13.png)
+
+En el menú **traces** también se puede analizar el flujo de cada nodo para efectos de resolución de problemas. Verás claramente cuáles nodos se ejecutaron y cuáles se saltaron en cada escenario.
 
 ### Recomendaciones
 
-- Una recomendación es extender las capacidades de este flujo con ramificaciones que consideren reintentos, y otros flujos secundarios para casos "edge".
-- Como vimos este flujo es secuencial y hasta cierto punto orquestado por el usuario, se invita opcionalmente a construir un flujo de tipo **Group Chat** que permita un manejo autonomo del redireccionamiento de los        agentes por parte de la IA Generativa.
+- El Router Agent puede refinarse continuamente ajustando su system prompt con más ejemplos de clasificación (few-shot examples). Cuantos más ejemplos específicos del dominio de Contoso incluyas, más preciso será el ruteo.
+- Una recomendación adicional es extender las capacidades de este flujo con ramificaciones que consideren reintentos cuando el Router no emita tags reconocidos, y otros flujos secundarios para casos "edge".
+- Como vimos, este flujo es determinístico pero inteligente en el ruteo inicial. Se invita opcionalmente a construir un flujo de tipo **Group Chat** que permita un manejo aún más autónomo de la colaboración entre agentes.
 
 ### 🎓 Bonus: Explorando Group Chat Workflow (Opcional)
 
@@ -658,9 +806,9 @@ Group Chat es útil cuando:
 
 ### 📚 Recursos Adicionales
 
-[Orchestrating Multi-Agent Conversations with Microsoft Foundry Workflows](https://techcommunity.microsoft.com/blog/azure-ai-foundry-blog/orchestrating-multi-agent-conversations-with-microsoft-foundry-workflows/4472329)
-[Multi-Agent Orchestration Patterns](https://techcommunity.microsoft.com/blog/azure-ai-foundry-blog/building-a-digital-workforce-with-multi-agents-in-azure-ai-foundry-agent-service/4414671)
-[Agent Framework Examples](https://github.com/microsoft/agent-framework)
-[Building No-Code Agentic Workflows with Microsoft Foundry](https://medium.com/data-science-collective/building-no-code-agentic-workflows-with-microsoft-foundry-52ad377ad644)
+[Orchestrating Multi-Agent Conversations with Microsoft Foundry Workflows](https://techcommunity.microsoft.com/blog/azure-ai-foundry-blog/orchestrating-multi-agent-conversations-with-microsoft-foundry-workflows/4472329)   
+[Multi-Agent Orchestration Patterns](https://techcommunity.microsoft.com/blog/azure-ai-foundry-blog/building-a-digital-workforce-with-multi-agents-in-azure-ai-foundry-agent-service/4414671)  
+[Agent Framework Examples](https://github.com/microsoft/agent-framework)  
+[Building No-Code Agentic Workflows with Microsoft Foundry](https://medium.com/data-science-collective/building-no-code-agentic-workflows-with-microsoft-foundry-52ad377ad644)  
 
 
