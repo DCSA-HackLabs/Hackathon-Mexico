@@ -693,7 +693,7 @@ Cuando el Router emite `[CROSS]`, ninguna condición individual es verdadera y e
 
 **Opción alternativa: YAML**
 
-Si prefieres cargar el workflow directamente vía YAML en lugar de construirlo nodo a nodo, abre la pestaña **YAML** en el canvas y pega el contenido del archivo `workflow-multi-agente-contoso.yaml` incluido en este repositorio. Luego regresa a la pestaña **Visualizer** para verificar la estructura y guarda.
+Si prefieres cargar el workflow directamente vía YAML en lugar de construirlo nodo a nodo, abre la pestaña **YAML** en el canvas y pega el contenido del archivo [Yaml](/`workflow-multi-agente-contoso.yaml.yaml) incluido en este repositorio. Luego regresa a la pestaña **Visualizer** para verificar la estructura y guarda.
 
 
 ### 6 - Testing y Validación el Workflow Multi-Agente
@@ -790,17 +790,17 @@ Analogía:
 
 Group Chat es útil cuando:
 
-✅ Los agentes deben negociar o debatir
-✅ El orden de participación depende del contexto
-✅ Necesitas escalamiento dinámico (Tier 1 → Tier 2 → Specialist)
-✅ Quieres que la IA decida la colaboración
+✅ Los agentes deben negociar o debatir  
+✅ El orden de participación depende del contexto  
+✅ Necesitas escalamiento dinámico (Tier 1 → Tier 2 → Specialist)  
+✅ Quieres que la IA decida la colaboración  
 
 **Ejemplos de casos de uso ideales:**
 
-- Customer Support Escalation: Agente básico → Especialista → Manager (según complejidad)
-- Medical Diagnosis: Múltiples especialistas discuten síntomas y llegan a consenso
-- Legal Case Analysis: Abogados debaten estrategia colaborativamente
-- Product Design: Designer, Engineer, PM iteran dinámicamente
+- Customer Support Escalation: Agente básico → Especialista → Manager (según complejidad)  
+- Medical Diagnosis: Múltiples especialistas discuten síntomas y llegan a consenso  
+- Legal Case Analysis: Abogados debaten estrategia colaborativamente  
+- Product Design: Designer, Engineer, PM iteran dinámicamente  
 
 ### 📚 Recursos Adicionales
 
