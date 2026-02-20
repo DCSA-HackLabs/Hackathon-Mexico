@@ -20,25 +20,21 @@ Requisitos previos
 ### 2 - Diseñar transformaciones básicas
 
 Dentro del diseñador de Dataflow:
-- Elimina columnas no necesarias.
-- Normaliza formatos: convertir fechas, cadenas (trim, lower), normalizar decimales, cambia tipos de datos.
-  ![formato fechas](https://github.com/stmora98/Del_Insight_a_la_Decision/blob/main/01-Ingesta%20con%20Data%20Factory%20en%20Fabric/Reference%20Pictures/Ejemplo%20transformacion%20fechas.png)
-  
-- Reemplaza o marca valores nulos (por ejemplo, `unknown` o valores por defecto).
-   ![valores vacios](https://github.com/stmora98/Del_Insight_a_la_Decision/blob/main/01-Ingesta%20con%20Data%20Factory%20en%20Fabric/Reference%20Pictures/Ejemplo%20transformacion%202.png)
-- Filtra registros corruptos o incompletos (si aplica).
-  
+- Elimina columnas no necesarias.  
+- Normaliza formatos: convertir fechas, cadenas (trim, lower), normalizar decimales, cambia tipos de datos.  
+- Reemplaza o marca valores nulos (por ejemplo, `unknown` o valores por defecto).  
+- Filtra registros corruptos o incompletos (si aplica).  
+
+![DF](/img/dfgen2.png)
 
 Consejo: agrega pasos de validación intermedios y usa muestras pequeñas para probar transformaciones.
 
 ### 3 - Destino: Lakehouse Bronze
 
-1. Configura el sink/destino como la Lakehouse `Contoso_Lakehouse` → buscar esquema → crear tabla. Ejemplo `[bronze].[sales]`. Repetir con los otros datasets
-   ![Guardar en tabla bronce](https://github.com/stmora98/Del_Insight_a_la_Decision/blob/main/01-Ingesta%20con%20Data%20Factory%20en%20Fabric/Reference%20Pictures/Guardar%20bronze%201.png)
+1. Configura el sink/destino como la Lakehouse `Contoso_Lakehouse` → buscar esquema → crear tabla. Ejemplo `[bronze].[sales]`. Recuerda activar la opcion de **advance options** : `Navigate using full hierarchy` que permite navegar sobre la estructura jerarquica de `schemas/tablas`.  Repetir con los otros datasets
+2. Ejecuta el Dataflow en modo de validacion y luego en producción.
 
-   ![Guardar como tabla nueva](https://github.com/stmora98/Del_Insight_a_la_Decision/blob/main/01-Ingesta%20con%20Data%20Factory%20en%20Fabric/Reference%20Pictures/Guardar%20bronze%202.png)
-
-3. Ejecuta el Dataflow en modo de validacion y luego en producción.
+ ![DF](/img/dfgen22.png)  
 
 ### 4 - Verificar y documentar
 
