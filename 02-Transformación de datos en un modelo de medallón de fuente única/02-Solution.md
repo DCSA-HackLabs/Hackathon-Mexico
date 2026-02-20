@@ -410,13 +410,16 @@ df_segmentado.groupBy("perfil_producto").count().orderBy("count", ascending=Fals
 
 ---
 
-## **🥇 Filtrar productos valiosos y disponibles**
-**NOTA**: Este paso puede omitirse si se desea analizar todos los tiers y no solo los productos de perfil alto (valioso)
+## **🥇 Filtrar productos disponibles**
+**NOTA**: Este paso puede ajustarse si se desea analizar todos los tiers o solo los productos de perfil alto (valioso)
 
 ```python
+#df_gold_retail = df_segmentado.filter(
+#    (col("perfil_producto") == "Valioso") & (col("disponible") == 1)
+#)
+#display(df_gold_retail)
 df_gold_retail = df_segmentado.filter(
-    (col("perfil_producto") == "Valioso") & (col("disponible") == 1)
-)
+    (col("disponible") == 1))
 ```
 
 ---
