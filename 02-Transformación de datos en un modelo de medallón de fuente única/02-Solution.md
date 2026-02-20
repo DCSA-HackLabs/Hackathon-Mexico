@@ -115,6 +115,14 @@ df_fin_clean = df_fin.filter(col("score_estimado").isNotNull())
 df_fin_clean = df_fin_clean .toDF(*[c.lower() for c in df_fin_clean.columns])
 ```
 ---
+## **Filtrando clientes sin nulos/na + edades y cantidad de prestamos correctos**
+```python
+df_fin_clean = df_fin_clean.dropna().filter(
+col("age").between(1, 120) & 
+(col("num_of_loan") >= 0) &
+(col("credit_history_age") != "NA"))
+```
+---
 
 ## **💾 Guardar tabla silver preparada**
 
