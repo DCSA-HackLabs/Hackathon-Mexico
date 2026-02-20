@@ -113,7 +113,7 @@ Verificación
    - Authentication kind: Account key
    - Acount key: El PRIMARY KEY de la cuenta de Cosmos DB. Se puede obtener en el recurso de Cosmos DB en la opción Settings → Keys → PRIMARY 
 
-	![Cosmos](/img/cosmoscon1.png)
+![Cosmos](/img/cosmoscon1.png)
 
 4. Testea y guarda la conexión.
 
