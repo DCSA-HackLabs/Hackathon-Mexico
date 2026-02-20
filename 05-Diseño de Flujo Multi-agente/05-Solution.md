@@ -668,9 +668,7 @@ Cuando el Router emite `[CROSS]`, ninguna condición individual es verdadera y e
 
 - **Set variable**: `LatestMessage` = `=UserMessage(Local.UserQuestion)`
 - **Invoke agent**: `Contoso-Sales-Analyst` → output: `Local.sales_output` (guardamos el output en una variable), autoSend: false
-- **Set variable**: `LatestMessage` = `=UserMessage(Local.UserQuestion)`
 - **Invoke agent**: `Contoso-Market-Research-Analyst` → output: `Local.LatestMessage`, autoSend: false
-- **Set variable**: `LatestMessage` = `=UserMessage(Local.UserQuestion)`
 - **Invoke agent**: `Contoso-Credit-Risk-Analyst` → output: `Local.LatestMessage`, autoSend: false
 - **Invoke agent**: `Contoso-Strategy-Advisor` → output: `Local.LatestMessage`, autoSend: false
 - **End Conversation**
