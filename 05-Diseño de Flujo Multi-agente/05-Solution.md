@@ -6,9 +6,7 @@ Guía paso a paso para habilitar un multi-agente desde AI Foundry integrado con 
 Antes de comenzar, asegúrate de tener:  
 ✅ Acceso a Microsoft Foundry con permisos de creación de agentes y workflows  
 ✅ Sales Operations Analyst (Contoso-Virtual-Analyst) ya creado y funcional  
-✅ Data Agent de Fabric conectado a gold.business_operations  
-✅ Data Agent de Fabric conectado a gold.credit_profiles_ml  
-✅ Bing Search habilitado en tu proyecto de Foundry  
+
 
 **Verificación de Prerequisitos**
 - Creación de un Agente Conversacional en AI Foundry con Integración a Microsoft Fabric - (ver `04-Solution.md`).
