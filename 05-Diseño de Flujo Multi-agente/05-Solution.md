@@ -1,4 +1,4 @@
-### Solution - Reto 5: Orquestación Multi-Agente
+# Solution - Reto 5: Orquestación Multi-Agente
 
 Guía paso a paso para habilitar un multi-agente desde AI Foundry integrado con el Data Agent de Microsoft Fabric y otros agentes. Esta solución incluye un **Router Agent** que orquesta el flujo de forma inteligente: emite un único tag (`[SALES]`, `[MARKET]`, `[CREDIT]` o `[CROSS]`) para dirigir la consulta al agente correcto, o activar todos los agentes especializados más el Strategy Advisor cuando la pregunta cruza múltiples dominios.
 
