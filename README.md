@@ -46,7 +46,7 @@ Al finalizar este hackathon, los participantes serán capaces de:
 
 
 # Arquitectura
-![Arquitectura](https://github.com/stmora98/Del_Insight_a_la_Decision/blob/main/Architecture/Architecture.png)
+![Arquitectura](img/architecture.png)
 
 
 # 📖 Historia de Caso de Uso
