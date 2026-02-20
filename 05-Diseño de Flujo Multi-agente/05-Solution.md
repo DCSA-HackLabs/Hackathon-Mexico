@@ -691,7 +691,7 @@ Cuando el Router emite `[CROSS]`, ninguna condición individual es verdadera y e
 
 **Opción alternativa: YAML**
 
-Si prefieres cargar el workflow directamente vía YAML en lugar de construirlo nodo a nodo, abre la pestaña **YAML** en el canvas y pega el contenido del archivo [Yaml](/`workflow-multi-agente-contoso.yaml.yaml) incluido en este repositorio. Luego regresa a la pestaña **Visualizer** para verificar la estructura y guarda.
+Si prefieres cargar el workflow directamente vía YAML en lugar de construirlo nodo a nodo, abre la pestaña **YAML** en el canvas y pega el contenido del archivo [workflow-multi-agente-contoso](/workflow-multi-agente-contoso.yaml) incluido en este repositorio. Luego regresa a la pestaña **Visualizer** para verificar la estructura y guarda.
 
 
 ### 6 - Testing y Validación el Workflow Multi-Agente
