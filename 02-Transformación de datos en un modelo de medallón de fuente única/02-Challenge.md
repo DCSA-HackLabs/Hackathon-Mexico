@@ -46,11 +46,11 @@ Para completar este reto deberas:
 
 Para Credit Score y Products
 
-1️⃣ Usa **funciones de ML integradas** o **librerías PySpark MLlib** / **scikit-learn** en tu notebook.  
+1️⃣ Usa **funciones de ML integradas** o **librerías PySpark MLlib** / **scikit-learn** en tu notebook.   
 2️⃣ Implementa un algoritmo de **K-Means** o el que consideres util para agrupar registros en clusteres:  
    - 🎯 Agrupa clientes o productos según características numéricas similares.  
-   - 🔍 Analiza las relaciones entre variables dentro de cada cluster.
-3️⃣ Guarda la versión final de las tablas en el **Lakehouse [Silver}**
+   - 🔍 Analiza las relaciones entre variables dentro de cada cluster.  
+3️⃣ Guarda la versión final de las tablas en el **Lakehouse [Silver}**  
 
 ✅ **Resultado esperado:** Obtienes una segmentación de tus datos de clientes y una comprensión más profunda de su comportamiento. Como se menciono anteriormente si no prefieres trabajar con ML, intenta desarrollar un analisis que descubra nuevos insights de los datos.
 
